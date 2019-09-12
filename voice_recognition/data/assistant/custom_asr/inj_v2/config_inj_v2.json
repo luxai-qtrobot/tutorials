@@ -1,0 +1,30 @@
+{
+    "Gestures": {
+        "vanilla": "9d47d34d-aaef-4d5d-aa2e-5d804a9bcd4e.vanilla", 
+        "ngram": true, 
+        "added": "9d47d34d-aaef-4d5d-aa2e-5d804a9bcd4e.added", 
+        "pruningThresholds": [], 
+        "order": 3
+    }, 
+    "snips/default--StopRecording": {
+        "vanilla": "2b80cd50-b17b-4b7d-8caa-6b6dbe64d952.vanilla", 
+        "ngram": true, 
+        "added": "2b80cd50-b17b-4b7d-8caa-6b6dbe64d952.added", 
+        "pruningThresholds": [], 
+        "order": 3
+    }, 
+    "snips/default--StartRecording": {
+        "vanilla": "af6e2fd4-a954-44f6-9b34-589d69411fdc.vanilla", 
+        "ngram": true, 
+        "added": "af6e2fd4-a954-44f6-9b34-589d69411fdc.added", 
+        "pruningThresholds": [], 
+        "order": 3
+    }, 
+    "Emotions": {
+        "vanilla": "fcc15766-eabe-4610-a511-f39e00d49e09.vanilla", 
+        "ngram": true, 
+        "added": "fcc15766-eabe-4610-a511-f39e00d49e09.added", 
+        "pruningThresholds": [], 
+        "order": 3
+    }
+}
