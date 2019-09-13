@@ -1,5 +1,8 @@
 ## Microphone - Voice Activity & Direction Detection
 
+Check it in this video:
+---
+
 [![Voice Activity & Direction Detection](http://img.youtube.com/vi/ua63cgrO0oU/0.jpg)](http://www.youtube.com/watch?v=ua63cgrO0oU "Far Field Microphone Array - Voice Activity & Direction Detection")
 
 NOTICE: You must read and fully understand Snips voice system before starting this!!!!

@@ -1,5 +1,7 @@
 ## Microphone - Voice Interaction
 
+Check it in this video:
+---
 [![Voice Interaction](http://img.youtube.com/vi/ol54IzyZOR0/0.jpg)](http://www.youtube.com/watch?v=ol54IzyZOR0 "Far Field Microphone Array - Voice Interaction")
 
 
