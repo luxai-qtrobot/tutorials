@@ -1,0 +1,8 @@
+<launch>
+  <node name="qt_emotion_app" pkg="qt_emotion_app" type="qt_emotion_app" output="screen">
+    <param name="fsm" value="$(find qt_emotion_app)/fsm/emotion_game.lua"/>
+    <param name="with_audio_files" value="false"/>
+    <param name="audio_path" value="$(find qt_emotion_app)/data/audio/Romanian"/>
+    <param name="speech_message_file" value="$(find qt_emotion_app)/data/speech/message_en.yaml"/>
+  </node>
+</launch>
