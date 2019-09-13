@@ -1,0 +1,23 @@
+{
+    "num_mel_bins": 13, 
+    "window_type": "povey", 
+    "kind": "personal", 
+    "window_size": 10, 
+    "cepstral_lifter": 22.0, 
+    "use_energy": false, 
+    "energy_floor": 0.0, 
+    "from_mfcc": 1, 
+    "dtw_ref": 0.22, 
+    "raw_energy": true, 
+    "frame_length_ms": 25.0, 
+    "frame_shift_ms": 10.0, 
+    "preemphasis_coefficient": 0.97, 
+    "to_mfcc": 13, 
+    "sample_rate": 16000, 
+    "dither": 0.0, 
+    "mel_low_freq": 20, 
+    "shift": 10, 
+    "num_mfcc": 13, 
+    "band_radius": 10, 
+    "hotword_key": "your_hotword_name"
+}

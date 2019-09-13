@@ -1,0 +1,58 @@
+{
+  "config": {
+    "ignore_stop_words": true,
+    "max_pattern_length": 1000,
+    "max_queries": 500,
+    "unit_name": "deterministic_intent_parser"
+  },
+  "group_names_to_slot_names": {
+    "group0": "GastureName",
+    "group1": "ShowEmotion",
+    "group2": "StartRecording",
+    "group3": "StopRecording"
+  },
+  "language_code": "en",
+  "patterns": {
+    "apaikan:Emotion": [
+      "^\\s*what\\s*is\\s*(?P<group1>%EMOTIONS%)\\s*emotion\\s*$",
+      "^\\s*how\\s*is\\s*emotion\\s*when\\s*are\\s*(?P<group1>%EMOTIONS%)\\s*$",
+      "^\\s*show\\s*us\\s*(?P<group1>%EMOTIONS%)\\s*emotion\\s*$",
+      "^\\s*show\\s*(?P<group1>%EMOTIONS%)\\s*emotion\\s*$",
+      "^\\s*how\\s*is\\s*(?P<group1>%EMOTIONS%)\\s*emotion\\s*$"
+    ],
+    "apaikan:Play": [
+      "^\\s*show\\s*us\\s*(?P<group0>%GESTURES%)\\s*gesture\\s*$",
+      "^\\s*how\\s*is\\s*(?P<group0>%GESTURES%)\\s*gesture\\s*$",
+      "^\\s*show\\s*(?P<group0>%GESTURES%)\\s*gesture\\s*$",
+      "^\\s*show\\s*how\\s*is\\s*(?P<group0>%GESTURES%)\\s*gesture\\s*$",
+      "^\\s*play\\s*(?P<group0>%GESTURES%)\\s*gesture\\s*$",
+      "^\\s*lets\\s*play\\s*(?P<group0>%GESTURES%)\\s*gesture\\s*$"
+    ],
+    "apaikan:Record": [
+      "^\\s*(?P<group2>%SNIPSDEFAULTSTARTRECORDING%)\\s*gesture\\s*$",
+      "^\\s*may\\s*i\\s*(?P<group2>%SNIPSDEFAULTSTARTRECORDING%)\\s*gesture\\s*$",
+      "^\\s*i\\s*would\\s*like\\s*(?P<group2>%SNIPSDEFAULTSTARTRECORDING%)\\s*gesture\\s*$",
+      "^\\s*i\\s*(?P<group2>%SNIPSDEFAULTSTARTRECORDING%)\\s*gesture\\s*$",
+      "^\\s*(?P<group2>%SNIPSDEFAULTSTARTRECORDING%)\\s*new\\s*gesture\\s*$",
+      "^\\s*lets\\s*(?P<group2>%SNIPSDEFAULTSTARTRECORDING%)\\s*gesture\\s*$",
+      "^\\s*lets\\s*(?P<group2>%SNIPSDEFAULTSTARTRECORDING%)\\s*new\\s*gesture\\s*$"
+    ],
+    "apaikan:Stop": [
+      "^\\s*(?P<group3>%SNIPSDEFAULTSTOPRECORDING%)\\s*recording\\s*$"
+    ]
+  },
+  "slot_names_to_entities": {
+    "apaikan:Emotion": {
+      "ShowEmotion": "Emotions"
+    },
+    "apaikan:Play": {
+      "GastureName": "Gestures"
+    },
+    "apaikan:Record": {
+      "StartRecording": "snips/default--StartRecording"
+    },
+    "apaikan:Stop": {
+      "StopRecording": "snips/default--StopRecording"
+    }
+  }
+}
