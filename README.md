@@ -8,9 +8,9 @@ This repository contains a set of code samples and tutorial for programming [QTr
 [**Examples**](examples/)
 ---
 * [**Motor**](examples/#Motor) : contains robot motors related examples
-* [**Voice**](#Voice) : contains voice direction and recognition examples
-* [**Interfaces**](#Interfaces) : contains robot standard interfaces (speecch, gesture,...) examples   
-* [**Vision**](#Vision) : contains robot visual perception examples
+* [**Voice**](examples/#Voice) : contains voice direction and recognition examples
+* [**Interfaces**](examples/#Interfaces) : contains robot standard interfaces examples   
+* [**Vision**](examples/#Vision) : contains robot visual perception examples
 
 
 [**Demos**](demos/)

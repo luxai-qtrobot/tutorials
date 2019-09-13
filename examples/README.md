@@ -6,20 +6,23 @@ Contents
 ---
 * [**Motor**](#Motor) : contains robot motors related examples
 * [**Voice**](#Voice) : contains voice direction and recognition examples
-* [**Interfaces**](#Interfaces) : contains robot standard interfaces (speecch, gesture,...) examples   
+* [**Interfaces**](#Interfaces) : contains robot standard interfaces examples   
 * [**Vision**](#Vision) : contains robot visual perception examples
 
 
 #### Interfaces
-
+* [`audio_interface`](audio_interface/) : demonstrates how to make robot sing something
+* [`emotion_interface`](emotion_interface/) : demonstrates how to make robot show some emotion
+* [`speech_interface`](speech_interface/) : demonstrates how to make robot say something
 
 #### Motor
+* [`motors_command`](motors_command/) : demonstrates how to command robot motors positions
+* [`motors_gesture`](motors_gesture/) : demonstrates how to run prerecorded gestures
+* [`motors_state`](motors_state/) : demonstrates how to read robot joints state such as positions
 
-* [`motors_command`](https://github.com/luxai-qrobot/tutorials/tree/master/motors_command) : demonstrates how to command robot motors positions
-* [`motors_state`](https://github.com/luxai-qrobot/tutorials/tree/master/motors_state) : demonstrates how to read robot joints state such as positions
+#### Voice
+* [`voice_activity`](voice_activity/) : demonstrates how to show voice activity
+* [`voice_direction`](voice_direction/) : demonstrates how to read direction of voice
 
 
 #### Vision
-
-
-#### Voice
