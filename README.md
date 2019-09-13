@@ -16,8 +16,8 @@ This repository contains a set of code samples and tutorial for programming [QTr
 [**Demos**](demos/)
 ---
 * [**Range of Motion & DOF**](demos/qt_range_of_motion/) : contains motor movement demo
-* [**Far-Field Microphone Array - Voice direction**](demo/qt_microphone_recognition/) : contains voice direction demo
-* [**Far-Field Microphone Array - Voice recognition**](demo/qt_microphone_direction/) : contains voice recognition demo
+* [**Far-Field Microphone Array - Voice activity & direction detection**](demo/qt_microphone_detection/) : contains voice activity and direction detection demo
+* [**Far-Field Microphone Array - Voice interaction**](demo/qt_microphone_interaction/) : contains voice interaction demo
 * [**Image recognition - Emotion Game**](demo/qt_emotion_game/) : contains image recognition emotion demo   
 * [**Image recognition - Memory Game**](demo/qt_memory_game/) : contains image recognition memory demo   
 * [**3D Camera - Gesture recognition**](demo/qt_gesture_recognition/) : contains 3D camera gesture recognition demo
