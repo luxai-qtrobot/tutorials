@@ -5,29 +5,48 @@ Check it in this video:
 
 [![Voice Activity & Direction Detection](http://img.youtube.com/vi/ua63cgrO0oU/0.jpg)](http://www.youtube.com/watch?v=ua63cgrO0oU "Far Field Microphone Array - Voice Activity & Direction Detection")
 
-NOTICE: You must read and fully understand Snips voice system before starting this!!!!
+NOTICE: You must run this demo on QTRP (head)!!!!
 
-Please read the documentation of snips to understand it https://console.snips.ai/login
-
-This demo is already installed on your QTrobot. you can find it under ~/robot/code/qt_app
-
-*Snips already installed on QTRP (head)*
-
-* how to run the snip servers:
+This demo needs some prerequisites:
 ```
-sudo systemctl start snips-asr.service snips-audio-server.service  snips-dialogue.service snips-hotword.service snips-nlu.service
+sudo apt-get update
+sudo pip install pyusb click
 ```
-* how to run qt_voice_app demo
+*OR*
 ```
-rosrun qt_voice_app qt_voice_app.py
+sudo apt-get update
+sudo `which pip` install pyusb click
 ```
 
-
-* Voice commands
-- Hey QT, show me your happy emotion
-- Hey QT, play happy gesture
-
-* Snips configuration file
+PyUSB needs root privileges, if you run the script without root you will see something like this:
 ```
-/etc/snips.toml
+usb.core.USBError: [Errno 13] Access denied (insufficient permissions)
 ```
+To fix this error we need to set up a udev rule file for the microphone to be able to access it with normal user.
+* Create a udev rules file:
+```
+ACTION=="add", SUBSYSTEMS=="usb", ATTRS{idVendor}=="2886", ATTRS{idProduct}=="0018", MODE="660", GROUP="plugdev"
+```
+Create this file in folder */etc/udev/rules.d/*. For example usual structure of the file name can be *Number-Name.rules*
+
+* Add the user to the *plugdev* group:
+```
+adduser username plugdev
+```
+
+* Reload udev system to see your changes:
+```
+sudo udevadm control --reload
+sudo udevadm trigger
+```
+* Reboot QTrobot:
+```
+sudo reboot
+```
+
+To run the demo go to *qt_microphone_detection* folder and run *voice_direction* python script:
+```
+cd qt_microphone_detection/
+python voice_direction.py
+```
+Now you can speak or sing around the QTrobot and he will follow your voice.
