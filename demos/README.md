@@ -1,4 +1,4 @@
-[**Demos**](demos/)
+**Demos**
 ---
 * [**Range of Motion & DOF**](demos/qt_range_of_motion/) : contains motor movement demo
 * [**Far-Field Microphone Array - Voice activity & direction detection**](demos/qt_microphone_detection/) : contains voice detection demo
