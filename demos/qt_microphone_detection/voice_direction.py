@@ -29,7 +29,7 @@ if __name__ == '__main__':
         rospy.sleep(1)
 
     # centering the head
-    href = Float64MultiArray(data=[0,0]])
+    href = Float64MultiArray(data=[0,0])
     head_pub.publish(href)
     rospy.sleep(1)
 
