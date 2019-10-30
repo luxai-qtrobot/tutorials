@@ -15,8 +15,7 @@ class image_converter:
   faces = None
 
   def __init__(self):
-    self.image_pub = rospy.Publisher("/image_converter/out", Image, queue_size=1)
-
+    self.image_pub = rospy.Publisher("/face_recognition/out", Image, queue_size=1)
     self.bridge = CvBridge()
     self.image_sub = rospy.Subscriber("/camera/color/image_raw",Image,self.image_callback)
     self.face_sub = rospy.Subscriber("/qt_nuitrack_app/faces", Faces, self.face_callback)
@@ -72,17 +71,17 @@ class image_converter:
       cv2.rectangle(cv_image, (x+80,y+h+110),
                               (x+80+100, y+h+10+110), (255,255,255), 1)
 
-    cv2.imshow("Image View", cv_image)
-    cv2.waitKey(1)
+    # cv2.imshow("Image View", cv_image)
+    # cv2.waitKey(1)
 
     try:
       self.image_pub.publish(self.bridge.cv2_to_imgmsg(cv_image, "bgr8"))
     except CvBridgeError as e:
       print(e)
 
-def main(args):   
-  ic = image_converter()
-  rospy.init_node('image_converter', anonymous=True)
+if __name__ == '__main__':
+  rospy.init_node('face_recognition', anonymous=True)
+  ic = image_converter()  
   
   #cv2.namedWindow("Image")
   #cv2.setWindowProperty("Image", cv2.WND_PROP_AUTOSIZE, cv2.WINDOW_NORMAL)
@@ -90,7 +89,5 @@ def main(args):
     rospy.spin()
   except KeyboardInterrupt:
     print("Shutting down")
-  cv2.destroyAllWindows()
+  #cv2.destroyAllWindows()
 
-if __name__ == '__main__':
-    main(sys.argv)
