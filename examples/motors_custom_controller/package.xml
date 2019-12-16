@@ -1,0 +1,25 @@
+<package format="2">
+  <name>motors_custom_controller</name>
+  <version>1.0.0</version>
+  <description>motors_custom_controller</description>
+
+  <maintainer email="ali.paikan@luxai.com">Ali Paikan</maintainer>
+
+  <license>LuxAI S.A</license>
+
+  <url type="bugtracker">https://github.com/luxai-qtrobot/tutorials/issues</url>
+  <url type="repository">https://github.com/luxai-qtrobot/tutorials</url>
+
+  <author>Ali Paikan</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>controller_interface</build_depend>
+  <exec_depend>controller_interface</exec_depend>
+
+  <build_depend>qt_motor</build_depend>
+  <exec_depend>qt_motor</exec_depend>
+
+  <export>
+    <controller_interface plugin="${prefix}/motors_custom_controller_plugin.xml"/>
+  </export>
+</package>

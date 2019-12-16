@@ -1,0 +1,9 @@
+<library path="lib/libmotors_custom_controller">
+
+  <class name="motors_custom_controller/QTCustomController" type="motors_custom_controller::QTCustomController" base_class_type="controller_interface::ControllerBase">
+    <description>
+      A custom controller for QTrobot.
+    </description>
+  </class>
+
+</library>
