@@ -1,7 +1,7 @@
 # Controlling QTrobot arms using MoveIt
 This advanced examples demosntrate how to use ROS MoveIT to control QTrobot arms. The examples draw some shapes (i,e. rectangle and spirals) on the XY plane in robot frame.
 
-![QTrobot MoveIt](doc/qt_moveit.png)
+![QTrobot MoveIt](../../doc/qt_moveit.png)
 
 ## Preparation and requirements
 Before running the example, please ensure that following setups of your QTrobot and the machine which you are running the example.
