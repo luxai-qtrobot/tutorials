@@ -1,0 +1,17 @@
+<package>
+
+  <name>motors_moveit</name>
+  <version>1.0.0</version>
+  <description>
+     An example of motion planning using moveit with QTrobot
+  </description>
+  <author email="ali.paikan@luxai.com">Ali Paikan</author>
+  <maintainer email="ali.paikan@luxai.com">Ali Paikan</maintainer>
+
+  <license>BSD</license>
+
+  <url type="website">http://www.luxai.com/</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+</package>

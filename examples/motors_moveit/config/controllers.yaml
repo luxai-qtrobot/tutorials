@@ -1,0 +1,24 @@
+controller_list:      
+  - name: qt_robot/head_controller
+    action_ns: follow_joint_trajectory
+    default: True
+    type: FollowJointTrajectory
+    joints:
+      - HeadYaw
+      - HeadPitch
+  - name: qt_robot/right_arm_controller
+    action_ns: follow_joint_trajectory
+    default: True
+    type: FollowJointTrajectory
+    joints:
+      - RightShoulderPitch
+      - RightShoulderRoll
+      - RightElbowRoll
+  - name: qt_robot/left_arm_controller
+    action_ns: follow_joint_trajectory
+    default: True
+    type: FollowJointTrajectory
+    joints:
+      - LeftShoulderPitch
+      - LeftShoulderRoll
+      - LeftElbowRoll
