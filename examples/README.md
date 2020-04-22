@@ -19,6 +19,7 @@ Contents
 * [`motors_command`](motors_command/) : demonstrates how to command robot motors positions
 * [`motors_gesture`](motors_gesture/) : demonstrates how to run prerecorded gestures
 * [`motors_state`](motors_state/) : demonstrates how to read robot joints state such as positions
+* [`motors_moveit`](motors_moveit/) : demonstrates how use ROS MoveIT to control QTrobot arms
 
 #### Voice
 * [`voice_activity`](voice_activity/) : demonstrates how to show voice activity
