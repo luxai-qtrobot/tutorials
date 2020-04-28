@@ -2,14 +2,15 @@
 # -*- coding: utf-8 -*-
 import sys
 import copy
-# import rospy
-# import moveit_commander
+import rospy
+import moveit_commander
 import re
 
-TABLE_HEIGH = 0.396
-PARK_POSE = [0.20, -0.20, TABLE_HEIGH + 0.03]
+TABLE_HEIGH = 0.4
+PEN_RISE = 0.03
 CX = 0.22   # x length 0.04
 CY = -0.14  # y length 0.12
+PARK_POSE = [CX, CY, TABLE_HEIGH + PEN_RISE]
 
 if __name__ == "__main__":
     moveit_commander.roscpp_initialize(sys.argv)
@@ -22,11 +23,17 @@ if __name__ == "__main__":
     with open(gcode_file, 'r') as gcode:
         for line in gcode:
             if "pen park" in line:
-                z = TABLE_HEIGH + 0.03
-                coordinations.append([x,y,z])
+                z = TABLE_HEIGH + PEN_RISE
+                if not coordinations:
+                    coordinations.append([x, y, z])
+                elif coordinations[-1] != [x, y, z]:
+                    coordinations.append([x, y, z])
                 print("up   %.3f, %.3f, %.3f" % (x,y, z))
                 x, y, z = PARK_POSE[0], PARK_POSE[1], PARK_POSE[2]
-                coordinations.append([x,y,z])
+                if not coordinations:
+                    coordinations.append([x, y, z])
+                elif coordinations[-1] != [x, y, z]:
+                    coordinations.append([x, y, z])
                 print("park %.3f, %.3f, %.3f" % (x,y, z))
             line = line.strip()
             if "pen down" in line:
@@ -34,7 +41,7 @@ if __name__ == "__main__":
                 coordinations.append([x,y,z])
                 print("down %.3f, %.3f, %.3f" % (x,y, z))
             elif "pen up" in line:
-                z = TABLE_HEIGH + 0.03
+                z = TABLE_HEIGH + PEN_RISE
                 coordinations.append([x,y,z])
                 print("up   %.3f, %.3f, %.3f" % (x,y, z))
             elif "draw" in line or "move" in line:
@@ -76,24 +83,25 @@ if __name__ == "__main__":
     group.set_start_state_to_current_state()
 
     # move to start waypoint
-    wpose = group.get_current_pose().pose
     group.set_position_target(coordinations[0])
     plan = group.go(wait=True)
     print("Reached starting point")
 
     # fill waypoints with data from gcode
+    waypoints = []
     wpose = group.get_current_pose().pose
     waypoints.append(copy.deepcopy(wpose))
     for cord in coordinations:
         wpose.position.x = cord[0]
         wpose.position.y = cord[1]
         wpose.position.z = cord[2]
+        # print("%.3f, %.3f, %.3f" % (wpose.position.x, wpose.position.y, wpose.position.z))
         waypoints.append(copy.deepcopy(wpose))
 
     # plan trajectorys
     plan, fraction = group.compute_cartesian_path(
                                    waypoints,   # waypoints to follow
-                                   0.01,        # eef_step
+                                   0.001,        # eef_step
                                    0.0,         # jump_threshold
                                    False)       # avoid_collisions
     # execute the plan
