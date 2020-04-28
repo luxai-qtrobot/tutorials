@@ -2,15 +2,12 @@
 # -*- coding: utf-8 -*-
 import sys
 import copy
-import rospy
-import moveit_commander
+# import rospy
+# import moveit_commander
 import re
-# import moveit_msgs.msg
-# import geometry_msgs.msg
-# from std_msgs.msg import String
-# from moveit_commander.conversions import pose_to_list
 
 TABLE_HEIGH = 0.396
+PARK_POSE = [0.20, -0.20, TABLE_HEIGH + 0.03]
 CX = 0.22   # x length 0.04
 CY = -0.14  # y length 0.12
 
@@ -18,6 +15,38 @@ if __name__ == "__main__":
     moveit_commander.roscpp_initialize(sys.argv)
     rospy.init_node('draw_rectangle', anonymous=True)
 
+    # extract coordination from gcode file
+    gcode_file = rospy.get_param('gcode', './data/drawing.gcode')
+    coordinations = []
+    x, y, z = PARK_POSE[0], PARK_POSE[1], PARK_POSE[2]
+    with open(gcode_file, 'r') as gcode:
+        for line in gcode:
+            if "pen park" in line:
+                z = TABLE_HEIGH + 0.03
+                coordinations.append([x,y,z])
+                print("up   %.3f, %.3f, %.3f" % (x,y, z))
+                x, y, z = PARK_POSE[0], PARK_POSE[1], PARK_POSE[2]
+                coordinations.append([x,y,z])
+                print("park %.3f, %.3f, %.3f" % (x,y, z))
+            line = line.strip()
+            if "pen down" in line:
+                z = TABLE_HEIGH
+                coordinations.append([x,y,z])
+                print("down %.3f, %.3f, %.3f" % (x,y, z))
+            elif "pen up" in line:
+                z = TABLE_HEIGH + 0.03
+                coordinations.append([x,y,z])
+                print("up   %.3f, %.3f, %.3f" % (x,y, z))
+            elif "draw" in line or "move" in line:
+                c = re.findall(r'[XY].?\d+.\d+', line)
+                if c:
+                    y = CY + float(c[0][1:]) / 1000.0
+                    x = CX + float(c[1][1:]) / 1000.0
+                    coordinations.append([x,y,z])
+                    print("goto %.3f, %.3f, %.3f" % (x,y, z))
+
+
+    # create robot commnader and moveGroup
     robot = moveit_commander.RobotCommander()
     scene = moveit_commander.PlanningSceneInterface()
     group = moveit_commander.MoveGroupCommander("right_arm")
@@ -36,10 +65,6 @@ if __name__ == "__main__":
     group_names = robot.get_group_names()
     print "============ Robot Groups:", robot.get_group_names()
 
-    # Sometimes for debugging it is useful to print the entire state of the
-    # print "============ Printing robot state"
-    # print(group.get_current_pose().pose)
-    # print(group.get_pose_reference_frame())
 
     group.allow_replanning(True)
     group.set_pose_reference_frame("base_link")
@@ -52,31 +77,18 @@ if __name__ == "__main__":
 
     # move to start waypoint
     wpose = group.get_current_pose().pose
-    group.set_position_target([wpose.position.x, wpose.position.y, wpose.position.z + 0.03])
+    group.set_position_target(coordinations[0])
     plan = group.go(wait=True)
-    group.set_position_target([CX, CY, TABLE_HEIGH+0.03])
-    plan = group.go(wait=True)
-    # wpose = group.get_current_pose().pose
-    # group.set_position_target([wpose.position.x, wpose.position.y, wpose.position.z-0.03])
-    # plan = group.go(wait=True)
     print("Reached starting point")
 
     # fill waypoints with data from gcode
-    waypoints = []
     wpose = group.get_current_pose().pose
     waypoints.append(copy.deepcopy(wpose))
-    gcode_file = rospy.get_param('gcode', './data/drawing.gcode')
-    with open(gcode_file, 'r') as gcode:
-        for line in gcode:
-            line = line.strip()
-            coord = re.findall(r'[XY].?\d+.\d+', line)
-            if coord:
-                # reverse x and y and convert mm to m
-                wpose.position.y = CY + float(coord[0][1:]) / 1000.0
-                wpose.position.x = CX + float(coord[1][1:]) / 1000.0
-                wpose.position.z = TABLE_HEIGH + 0.03 if float(coord[0][1:]) == 0 and float(coord[1][1:]) == 0 else TABLE_HEIGH
-                waypoints.append(copy.deepcopy(wpose))
-                print(wpose.position.x, wpose.position.y, wpose.position.z)
+    for cord in coordinations:
+        wpose.position.x = cord[0]
+        wpose.position.y = cord[1]
+        wpose.position.z = cord[2]
+        waypoints.append(copy.deepcopy(wpose))
 
     # plan trajectorys
     plan, fraction = group.compute_cartesian_path(
