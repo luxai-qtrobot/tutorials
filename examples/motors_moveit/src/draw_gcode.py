@@ -53,8 +53,6 @@ if __name__ == "__main__":
                     coordinations.append([x,y,z])
                     print("goto %.3f, %.3f, %.3f" % (x,y, z))
 
-    sys.exit(0)
-
     # create robot commnader and moveGroup
     robot = moveit_commander.RobotCommander()
     scene = moveit_commander.PlanningSceneInterface()
