@@ -1,0 +1,6 @@
+<launch>
+  <param name="gcode" value="$(find motors_moveit)/data/drawing.gcode"/>
+  <node pkg="motors_moveit" name="draw_gcode" type="draw_gcode.py" output="screen">
+    <remap from="joint_states" to="qt_robot/joints/state"/>
+  </node>
+</launch>

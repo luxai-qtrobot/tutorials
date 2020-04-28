@@ -13,11 +13,12 @@ CY = -0.14  # y length 0.12
 PARK_POSE = [CX, CY, TABLE_HEIGH + PEN_RISE]
 
 if __name__ == "__main__":
+
     moveit_commander.roscpp_initialize(sys.argv)
-    rospy.init_node('draw_rectangle', anonymous=True)
+    rospy.init_node('draw_gcode', anonymous=True)
 
     # extract coordination from gcode file
-    gcode_file = rospy.get_param('gcode', './data/drawing.gcode')
+    gcode_file = rospy.get_param('gcode')
     coordinations = []
     x, y, z = PARK_POSE[0], PARK_POSE[1], PARK_POSE[2]
     with open(gcode_file, 'r') as gcode:
@@ -52,6 +53,7 @@ if __name__ == "__main__":
                     coordinations.append([x,y,z])
                     print("goto %.3f, %.3f, %.3f" % (x,y, z))
 
+    sys.exit(0)
 
     # create robot commnader and moveGroup
     robot = moveit_commander.RobotCommander()
