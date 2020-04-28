@@ -101,7 +101,7 @@ if __name__ == "__main__":
     # plan trajectorys
     plan, fraction = group.compute_cartesian_path(
                                    waypoints,   # waypoints to follow
-                                   0.001,        # eef_step
+                                   0.0001,        # eef_step
                                    0.0,         # jump_threshold
                                    False)       # avoid_collisions
     # execute the plan
