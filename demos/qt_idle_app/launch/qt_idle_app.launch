@@ -1,0 +1,8 @@
+<launch>
+  <node name="qt_idle_app" pkg="qt_idle_app" type="qt_idle_app" output="screen">
+    <param name="fsm" value="$(find qt_idle_app)/fsm/look_around.lua"/>
+    <param name="idle_time_min" value="60"/>
+    <param name="idle_time_max" value="120"/>
+  </node>
+</launch>
+
