@@ -11,7 +11,8 @@ NAME = 'qt_gspeech_service'
 
 # Audio recording parameters
 RATE = 16000
-CHUNK = 1024  # 100ms
+CHUNK = 1024
+MIC_ID = 2 #default mic id
 
 class MicrophoneStream(object):
     """Opens a recording stream as a generator yielding the audio chunks."""
@@ -35,7 +36,7 @@ class MicrophoneStream(object):
             input=True,
             frames_per_buffer=self._chunk,
             # ReSpeaker Mic device index is 2
-            input_device_index = 2,
+            input_device_index = MIC_ID,
             # Run the audio stream asynchronously to fill the buffer object.
             # This is necessary so that the input device's buffer doesn't
             # overflow while the calling thread makes network requests, etc.
@@ -178,6 +179,14 @@ def validate_response(responses, context):
 
 def qtrobot_gspeech_service():
     rospy.init_node(NAME)
+    p = pyaudio.PyAudio()
+    info = p.get_host_api_info_by_index(0)
+    numdevices = info.get('deviceCount')
+    for i in range(0, numdevices):
+            if (p.get_device_info_by_host_api_device_index(0, i).get('maxInputChannels')) > 0:
+                if "ReSpeaker" in p.get_device_info_by_host_api_device_index(0, i).get('name'):
+                    MIC_ID = i #new mic id
+
     s = rospy.Service('qt_gspeech_service', QTrobotGspeech, qt_gspeech_callback)
     print("Ready to Listen!")
     # spin() keeps Python from exiting until node is shutdown
