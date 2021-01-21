@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import pyaudio
 import rospy
+import time
 from six.moves import queue
 from google.cloud import speech
 from google.cloud.speech import enums
@@ -11,7 +12,7 @@ NAME = 'qt_gspeech_service'
 
 # Audio recording parameters
 RATE = 16000
-CHUNK = 1024
+CHUNK = int(RATE/10) #100 ms
 MIC_ID = 2 #default mic id
 
 class MicrophoneStream(object):
@@ -97,8 +98,8 @@ def qt_gspeech_callback(req):
     speech_context = []
     language_code = "en-US"  # a BCP-47 language tag
     client = speech.SpeechClient()
-    print(req.options)
-    if req.options:
+    print(len(req.options))
+    if len(req.options) > 1:
         print("there is options....")
         for option in req.options:
             answer_context.append(option.lower().strip())
@@ -128,13 +129,11 @@ def qt_gspeech_callback(req):
             for content in audio_generator
         )
         try:
-            responses = client.streaming_recognize(streaming_config, requests, timeout=req.timeout)
+            responses = client.streaming_recognize(streaming_config, requests, timeout=mic_timeout)
             output = validate_response(responses, answer_context)
-            pass
 
         except gexcp.DeadlineExceeded as e:
             output = "#TIMEOUT#"
-            pass
 
     print("Detected [%s]" % (output))
     return QTrobotGspeechResponse(output)
@@ -178,15 +177,24 @@ def validate_response(responses, context):
     return transcript
 
 def qtrobot_gspeech_service():
-    rospy.init_node(NAME)
-    p = pyaudio.PyAudio()
-    info = p.get_host_api_info_by_index(0)
-    numdevices = info.get('deviceCount')
-    for i in range(0, numdevices):
-            if (p.get_device_info_by_host_api_device_index(0, i).get('maxInputChannels')) > 0:
-                if "ReSpeaker" in p.get_device_info_by_host_api_device_index(0, i).get('name'):
-                    MIC_ID = i #new mic id
+    print("waiting for microphone")
+    get_id = False
+    while not get_id:
+        p = pyaudio.PyAudio()
+        time.sleep(2)
+        print("after init")
+        for i in range(p.get_device_count()):
+            dev = p.get_device_info_by_index(i)
+            if "ReSpeaker" in dev['name']:
+                get_id=True
+                MIC_ID = dev['index']
+                print(dev)
+        p.terminate()
+        time.sleep(2)
 
+
+    print("inti ros node")
+    rospy.init_node(NAME)
     s = rospy.Service('qt_gspeech_service', QTrobotGspeech, qt_gspeech_callback)
     print("Ready to Listen!")
     # spin() keeps Python from exiting until node is shutdown
