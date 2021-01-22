@@ -119,15 +119,25 @@ class QTrobotGoogleSpeech(object):
         print("timeout:", str(req.timeout))
         answer_context = []
         speech_context = None
-        for option in req.options:
-            if option.strip():
-                answer_context.append(option.lower().strip())
-        speech_context = [types.SpeechContext(phrases = answer_context)] if len(answer_context) else None
-        config = types.RecognitionConfig(
-            encoding=enums.RecognitionConfig.AudioEncoding.LINEAR16,
-            sample_rate_hertz=16000,
-            language_code= str(req.language.strip()) if req.language.strip() else "en-US",
-            speech_contexts = speech_context)
+        if option.strip():
+            print("got options..")
+            for option in req.options:
+                if option.strip():
+                    answer_context.append(option.lower().strip())
+            speech_context = [types.SpeechContext(phrases = answer_context)] if len(answer_context) else None
+            config = types.RecognitionConfig(
+                encoding=enums.RecognitionConfig.AudioEncoding.LINEAR16,
+                sample_rate_hertz=16000,
+                language_code= str(req.language.strip()) if req.language.strip() else "en-US",
+                speech_contexts = speech_context
+            )
+        else:
+            print("no options")
+            config = types.RecognitionConfig(
+                encoding=enums.RecognitionConfig.AudioEncoding.LINEAR16,
+                sample_rate_hertz=16000,
+                language_code= str(req.language.strip()) if req.language.strip() else "en-US"
+            )
 
         streaming_config = types.StreamingRecognitionConfig(config=config, interim_results=True)
         with MicrophoneStream(self.stream_buff) as mic:
@@ -166,11 +176,10 @@ class QTrobotGoogleSpeech(object):
                 continue
             transcript = result.alternatives[0].transcript
             if not result.is_final:
-                pass
-                 # if context:
-                 #     for option in context:
-                 #         if option == transcript.lower().strip():
-                 #             return transcript
+                if context:
+                    for option in context:
+                        if option == transcript.lower().strip():
+                            return transcript
             else:
                  return transcript
 
