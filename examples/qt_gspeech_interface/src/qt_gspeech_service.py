@@ -123,15 +123,14 @@ class QTrobotGoogleSpeech(object):
             for option in req.options:
                 if option.strip():
                     answer_context.append(option.lower().strip())
-            speech_context = [types.SpeechContext(phrases = answer_context)] if len(answer_context) else None
+            speech_context = types.SpeechContext(phrases = answer_context) if len(answer_context) else None
             config = types.RecognitionConfig(
                 encoding=enums.RecognitionConfig.AudioEncoding.LINEAR16,
                 sample_rate_hertz=16000,
                 language_code= str(req.language.strip()) if req.language.strip() else "en-US",
-                speech_contexts = speech_context
+                speech_contexts = [speech_context]
             )
         else:
-            print("no options")
             config = types.RecognitionConfig(
                 encoding=enums.RecognitionConfig.AudioEncoding.LINEAR16,
                 sample_rate_hertz=16000,
