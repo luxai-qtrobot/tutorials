@@ -70,9 +70,6 @@ class QTrobotGoogleSpeech(object):
                     stream_callback=self.callback_stream,
                     input=True)
 
-        # init google speech client
-        self.client = speech.SpeechClient()
-
         # start recognize service
         self.gspeech_recognize = rospy.Service(prefix+'/recognize', QTrobotGspeech, self.callback_recognize)
 
@@ -113,14 +110,16 @@ class QTrobotGoogleSpeech(object):
         ros speech recognize callback
     """
     def callback_recognize(self, req):
+        # init google speech client
+        self.client = speech.SpeechClient()
+        
         self.stream.start_stream()
         print("options:", len(req.options), req.options)
         print("language:", req.language)
         print("timeout:", str(req.timeout))
         answer_context = []
         speech_context = None
-        if option.strip():
-            print("got options..")
+        if len(req.options)>1:
             for option in req.options:
                 if option.strip():
                     answer_context.append(option.lower().strip())
