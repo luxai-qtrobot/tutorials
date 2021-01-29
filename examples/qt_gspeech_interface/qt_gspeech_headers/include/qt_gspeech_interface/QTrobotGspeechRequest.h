@@ -24,16 +24,21 @@ struct QTrobotGspeechRequest_
   typedef QTrobotGspeechRequest_<ContainerAllocator> Type;
 
   QTrobotGspeechRequest_()
-    : options()
+    : language()
+    , options()
     , timeout(0)  {
     }
   QTrobotGspeechRequest_(const ContainerAllocator& _alloc)
-    : options(_alloc)
+    : language(_alloc)
+    , options(_alloc)
     , timeout(0)  {
   (void)_alloc;
     }
 
 
+
+   typedef std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other >  _language_type;
+  _language_type language;
 
    typedef std::vector<std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other > , typename ContainerAllocator::template rebind<std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other > >::other >  _options_type;
   _options_type options;
@@ -76,7 +81,7 @@ namespace message_traits
 
 
 // BOOLTRAITS {'IsFixedSize': False, 'IsMessage': True, 'HasHeader': False}
-// {'qt_gspeech_interface': ['/home/qtrobot/catkin_ws/src/qt_gspeech_interface/msg'], 'std_msgs': ['/opt/ros/kinetic/share/std_msgs/cmake/../msg']}
+// {'std_msgs': ['/opt/ros/kinetic/share/std_msgs/cmake/../msg']}
 
 // !!!!!!!!!!! ['__class__', '__delattr__', '__dict__', '__doc__', '__eq__', '__format__', '__getattribute__', '__hash__', '__init__', '__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', '__weakref__', '_parsed_fields', 'constants', 'fields', 'full_name', 'has_header', 'header_present', 'names', 'package', 'parsed_fields', 'short_name', 'text', 'types']
 
@@ -119,12 +124,12 @@ struct MD5Sum< ::qt_gspeech_interface::QTrobotGspeechRequest_<ContainerAllocator
 {
   static const char* value()
   {
-    return "c7905c636e3a74c1e2131e884321e218";
+    return "59e07ffbd2874b74f07ac395b9d4708f";
   }
 
   static const char* value(const ::qt_gspeech_interface::QTrobotGspeechRequest_<ContainerAllocator>&) { return value(); }
-  static const uint64_t static_value1 = 0xc7905c636e3a74c1ULL;
-  static const uint64_t static_value2 = 0xe2131e884321e218ULL;
+  static const uint64_t static_value1 = 0x59e07ffbd2874b74ULL;
+  static const uint64_t static_value2 = 0xf07ac395b9d4708fULL;
 };
 
 template<class ContainerAllocator>
@@ -143,7 +148,8 @@ struct Definition< ::qt_gspeech_interface::QTrobotGspeechRequest_<ContainerAlloc
 {
   static const char* value()
   {
-    return "string[] options\n\
+    return "string language\n\
+string[] options\n\
 int64 timeout\n\
 ";
   }
@@ -163,6 +169,7 @@ namespace serialization
   {
     template<typename Stream, typename T> inline static void allInOne(Stream& stream, T m)
     {
+      stream.next(m.language);
       stream.next(m.options);
       stream.next(m.timeout);
     }
@@ -183,6 +190,8 @@ struct Printer< ::qt_gspeech_interface::QTrobotGspeechRequest_<ContainerAllocato
 {
   template<typename Stream> static void stream(Stream& s, const std::string& indent, const ::qt_gspeech_interface::QTrobotGspeechRequest_<ContainerAllocator>& v)
   {
+    s << indent << "language: ";
+    Printer<std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other > >::stream(s, indent + "  ", v.language);
     s << indent << "options[]" << std::endl;
     for (size_t i = 0; i < v.options.size(); ++i)
     {

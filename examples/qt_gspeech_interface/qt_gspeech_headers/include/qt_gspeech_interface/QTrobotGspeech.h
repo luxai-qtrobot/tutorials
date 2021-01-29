@@ -40,7 +40,7 @@ template<>
 struct MD5Sum< ::qt_gspeech_interface::QTrobotGspeech > {
   static const char* value()
   {
-    return "2e9160b2c93872c949e46fee310a6d5c";
+    return "75ea4008cc551c1370d02f534ba1f8f9";
   }
 
   static const char* value(const ::qt_gspeech_interface::QTrobotGspeech&) { return value(); }

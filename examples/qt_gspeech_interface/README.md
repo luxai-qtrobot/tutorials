@@ -4,30 +4,88 @@
     Get the full code in our [github tutorial repository.](ttps://github.com/luxai-qtrobot/tutorials/blob/master/examples/qt_gspeech_interface/README.md)
 
 !!! warning "Notice"
-    ***Everything should be installed on QTRP (head) - 192.168.100.1***
+    *Everything should be installed on QTRP (head) - 192.168.100.1*
 
-## 1.Install python3 modules
+----
+## **1. QTrobot with pre-installed google speech interface**
 
-```bash
-sudo apt-get install python3-pip python3-yaml
-pip3 install rospkg pyaudio six
-```
+!!! warning "Notice"
+    *Please follow the instruction bellow if your QTrobot came with pre-installed google speech recognition*
 
-## 2.Prepare QTrobot (get files and setup the environment)
+### ***1.1 Setup Google Cloud and download your private key***
 
--  **Connect to QTrobot hotspot and ssh to QTrobot**
+ - Follow the 1. Step from [instructions](https://cloud.google.com/speech-to-text/docs/quickstart-client-libraries#before-you-begin) to setup your Google Console and SpeechToText
+ - From 1.Step ***Download a private key as JSON*** and save it inside ***"~/robot/code/tutorials/examples/qt_gspeech_interface"*** folder you will need it to run the application.
+
+### ***1.2 Connect to QTrobot hotspot and ssh to QTrobot and initalize Google cloud***
 
 ```bash
 ssh qtrobot@192.168.100.1
 ```
 
+```bash
+gcloud init
+```
+
+!!! info ""
+    When initializing google cloud just follow the steps from command line (login to your google account, select your google-cloud-server)
+
+### ***1.3 Enable qt_gspeech_interface***
+
+```bash
+sudo nano ~/robot/autostart/autostart_screens.sh
+```
+
+!!! info ""
+    Uncomment the last line in autostart script "run_script "start_qt_gspeech_interface.sh"". Save it (Ctrl+O), exit (Ctrl+X) and reboot the QTrobot.
+
+### ***1.4 Running the QTrobot Google Speech Ros service***
+
+- **To check if it is running you can list all rosservices**
+
+```bash
+rosservice list
+```
+
+!!! info ""
+    You should see /qt_robot/speech/recognize
+
+- **To run:**
+
+```bash
+rosservice call /qt_gspeech_service "language:'' options: - '' timeout:10"
+```
+
+----
+
+## **2. Full installation of google speech interface**
+
+-  **Connect to QTrobot hotspot and ssh to QTrobot**
+```bash
+ssh qtrobot@192.168.100.1
+```
+
+### ***2.1 Install python3 modules***
+
+```bash
+sudo apt-get update && sudo apt-get install python3-pip python3-yaml portaudio19-dev
+```
+
+```bash
+pip3 install --user --upgrade pip
+```
+
+```bash
+pip3 install rospkg pyaudio six
+```
+
+### ***2.2 Prepare QTrobot (get files and setup the environment)***
+
+
 - **Clone the github repository into "robot/code" folder**
 
 ```bash
-cd ~/robot/code
-```
-```bash
-git clone https://github.com/luxai-qtrobot/tutorials.git
+cd ~/robot/code && git clone https://github.com/luxai-qtrobot/tutorials.git
 ```
 
 
@@ -37,62 +95,65 @@ git clone https://github.com/luxai-qtrobot/tutorials.git
 cp ~/robot/code/tutorials/examples/qt_gspeech_interface/autostart/start_qt_gspeech_interface.sh ~/robot/autostart
 ```
 
-- **Enable the script in autostart_screen.sh**
+- **Enable the qt_gspeech_interface in autostart_screen.sh**
 
 ```bash
-nano ~/robot/autostart/autostart_screen.sh
+sudo nano ~/robot/autostart/autostart_screens.sh
 ```
-
-Below the last "run_script" copy and paste next text:
 
 ```bash
 run_script "start_qt_gspeech_interface.sh"
 ```
 
-Save it (Ctrl+O) and exit (Ctrl+X).
+!!! info ""
+    Below the last command *"run_script"* copy and paste the command above. Save it (Ctrl+O) and exit (Ctrl+X).
 
 
-## 3.Setup Google Cloud
+### ***2.3 Setup Google Cloud***
 
  - Follow the [instructions](https://cloud.google.com/speech-to-text/docs/quickstart-client-libraries) to setup your Google Console and SpeechToText
- - From 1.Step "Download a private key as JSON." save it inside "~/robot/code/tutorials/examples/qt_gspeech_interface/instance" folder you will need it to run the application.
+ - From 1.Step ***Download a private key as JSON*** and save it inside ***"~/robot/code/tutorials/examples/qt_gspeech_interface"*** folder you will need it to run the application.
  - Install [Google Cloud SDK](https://cloud.google.com/sdk/docs/install) and Google Cloud Python SDK (4.step)
- - Install [Client Library](https://cloud.google.com/speech-to-text/docs/quickstart-client-libraries#install_the_client_library)
+ - Install [Client Library](https://cloud.google.com/speech-to-text/docs/quickstart-client-libraries#install_the_client_library) --> use **pip3**
 
-## 4.Linking your folder and building catkin workspace
+### ***2.4 Link your folder and build catkin qt_gspeech_interface package***
 
 ```bash
 cd ~/catkin_ws/src && ln -s ~/robot/code/tutorials/examples/qt_gspeech_interface .
-cd ~/catkin_ws && catkin_make
 ```
 
-## 5.Running the QTrobot Google Speech Ros service
+```bash
+cd ~/catkin_ws && catkin_make --pkg qt_gspeech_interface
+```
 
-Make sure that you have uncommented "run_script "start_qt_gspeech_interface.sh"" in autostart_screen.sh.
-After that just reboot the QTrobot.
+### ***2.5 Running the QTrobot Google Speech Ros service***
 
-To check if it is running you can list all rosservices and check for "/qt_gspeech_service".
+!!! info ""
+    Make sure that you have uncommented "run_script "start_qt_gspeech_interface.sh"" in autostart_screen.sh.
+    After that just reboot the QTrobot.
+
+- **To check if it is running you can list all rosservices**
 
 ```bash
 rosservice list
 ```
 
-To run:
+!!! info ""
+    You should see /qt_robot/speech/recognize
+
+- **To run:**
 
 ```bash
-rosservice call /qt_gspeech_service "options: - '' timeout:10"
+rosservice call /qt_gspeech_service "language:'' options: - '' timeout:10"
 ```
 
-For better understanding for speech context you can provide an array of words, like this example:
+### ***2.6 Additional***
+
+
+- **copy qt_gspeech_headers to your PC or QTPC**
+
+*If you want to call this service outside of QTRP environment then you should copy content of qt_gspeech_headers to your catkin workspace*
 
 ```bash
-rosservice call /qt_gspeech_service "options: - '' timeout:10"
-```
-
-## qt_gspeech_headers to catkin workspace
-If you want to call this service outside of QTRP environment then you should copy content of qt_gspeech_headers to your catkin workspace
-
-```bash
-cd ~/robot/code/tutorials/examples/qt_gspeech_interface/qt_gspeech_headers
-cp -r * ~/catkin_ws/devel/
+cd ~/robot/code/tutorials/examples/qt_gspeech_interface/qt_gspeech_headers && cp -r * ~/catkin_ws/devel/
 ```

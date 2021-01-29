@@ -8,14 +8,15 @@ import struct
 
 
 class QTrobotGspeechRequest(genpy.Message):
-  _md5sum = "c7905c636e3a74c1e2131e884321e218"
+  _md5sum = "59e07ffbd2874b74f07ac395b9d4708f"
   _type = "qt_gspeech_interface/QTrobotGspeechRequest"
   _has_header = False  # flag to mark the presence of a Header object
-  _full_text = """string[] options
+  _full_text = """string language
+string[] options
 int64 timeout
 """
-  __slots__ = ['options','timeout']
-  _slot_types = ['string[]','int64']
+  __slots__ = ['language','options','timeout']
+  _slot_types = ['string','string[]','int64']
 
   def __init__(self, *args, **kwds):
     """
@@ -25,7 +26,7 @@ int64 timeout
     changes.  You cannot mix in-order arguments and keyword arguments.
 
     The available fields are:
-       options,timeout
+       language,options,timeout
 
     :param args: complete set of field values, in .msg order
     :param kwds: use keyword arguments corresponding to message field names
@@ -34,11 +35,14 @@ int64 timeout
     if args or kwds:
       super(QTrobotGspeechRequest, self).__init__(*args, **kwds)
       # message fields cannot be None, assign default values for those that are
+      if self.language is None:
+        self.language = ''
       if self.options is None:
         self.options = []
       if self.timeout is None:
         self.timeout = 0
     else:
+      self.language = ''
       self.options = []
       self.timeout = 0
 
@@ -54,6 +58,12 @@ int64 timeout
     :param buff: buffer, ``StringIO``
     """
     try:
+      _x = self.language
+      length = len(_x)
+      if python3 or type(_x) == unicode:
+        _x = _x.encode('utf-8')
+        length = len(_x)
+      buff.write(struct.Struct('<I%ss'%length).pack(length, _x))
       length = len(self.options)
       buff.write(_struct_I.pack(length))
       for val1 in self.options:
@@ -75,6 +85,15 @@ int64 timeout
     codecs.lookup_error("rosmsg").msg_type = self._type
     try:
       end = 0
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      if python3:
+        self.language = str[start:end].decode('utf-8', 'rosmsg')
+      else:
+        self.language = str[start:end]
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
@@ -105,6 +124,12 @@ int64 timeout
     :param numpy: numpy python module
     """
     try:
+      _x = self.language
+      length = len(_x)
+      if python3 or type(_x) == unicode:
+        _x = _x.encode('utf-8')
+        length = len(_x)
+      buff.write(struct.Struct('<I%ss'%length).pack(length, _x))
       length = len(self.options)
       buff.write(_struct_I.pack(length))
       for val1 in self.options:
@@ -127,6 +152,15 @@ int64 timeout
     codecs.lookup_error("rosmsg").msg_type = self._type
     try:
       end = 0
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      if python3:
+        self.language = str[start:end].decode('utf-8', 'rosmsg')
+      else:
+        self.language = str[start:end]
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
@@ -287,6 +321,6 @@ def _get_struct_I():
     return _struct_I
 class QTrobotGspeech(object):
   _type          = 'qt_gspeech_interface/QTrobotGspeech'
-  _md5sum = '2e9160b2c93872c949e46fee310a6d5c'
+  _md5sum = '75ea4008cc551c1370d02f534ba1f8f9'
   _request_class  = QTrobotGspeechRequest
   _response_class = QTrobotGspeechResponse
