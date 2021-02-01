@@ -8,7 +8,17 @@ LOG_FILE=$(prepare_logfile "$SCRIPT_NAME")
 prepare_ros_environment
 wait_for_ros_node "/rosout" 60
 
-exec echo "qtrobot" | sudo -kSi GOOGLE_APPLICATION_CREDENTIALS="/home/qtrobot/robot/code/tutorials/examples/qt_gspeech_interface/service.json" PYTHONPATH=${PYTHONPATH}:/home/qtrobot/.local/lib/python3.5/site-packages/:/home/qtrobot/catkin_ws/devel/lib/python2.7/dist-packages/  python3 /home/qtrobot/robot/code/tutorials/examples/qt_gspeech_interface/src/qt_gspeech_service.py
+
+read -d '' SPEECHENV << EOF 
+source /home/qtrobot/catkin_ws/src/qt_gspeech_interface/.venv/bin/activate;
+export GOOGLE_APPLICATION_CREDENTIALS="/home/qtrobot/robot/code/tutorials/examples/qt_gspeech_interface/service.json";
+export PYTHONPATH="${PYTHONPATH}:/home/qtrobot/catkin_ws/devel/lib/python2.7/dist-packages";
+python /home/qtrobot/catkin_ws/src/qt_gspeech_interface/src/qt_gspeech_service.py;
+EOF
+
+exec echo "qtrobot" | sudo -kSi bash -c "$SPEECHENV"
 
 } &>> ${LOG_FILE}
+
+
 

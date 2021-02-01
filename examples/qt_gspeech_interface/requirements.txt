@@ -1,0 +1,5 @@
+google-cloud-speech
+PyAudio
+PyYAML
+rospkg
+
