@@ -126,7 +126,7 @@ pip3 install -r requirements.txt
  - From 1.Step ***Download a private key as JSON*** and save it inside ***"~/robot/code/tutorials/examples/qt_gspeech_interface"*** folder you will need it to run the application.
  - Install [Google Cloud SDK](https://cloud.google.com/sdk/docs/install) and Google Cloud Python SDK (4.step)
 
-### ***2.4 Link your folder and build catkin qt_gspeech_interface package***
+### ***2.5 Link your folder and build catkin qt_gspeech_interface package***
 
 ```bash
 cd ~/catkin_ws/src && ln -s ~/robot/code/tutorials/examples/qt_gspeech_interface .
@@ -136,7 +136,7 @@ cd ~/catkin_ws/src && ln -s ~/robot/code/tutorials/examples/qt_gspeech_interface
 cd ~/catkin_ws && catkin_make --pkg qt_gspeech_interface
 ```
 
-### ***2.5 Running the QTrobot Google Speech Ros service***
+### ***2.6 Running the QTrobot Google Speech Ros service***
 
 !!! info ""
     Make sure that you have uncommented "run_script "start_qt_gspeech_interface.sh"" in autostart_screen.sh.
@@ -157,7 +157,7 @@ rosservice list
 rosservice call /qt_gspeech_service "language:'' options: - '' timeout:10"
 ```
 
-### ***2.6 Additional***
+### ***2.7 Additional***
 
 *If you want to call this service outside of QTRP environment then you should copy content of qtpc_gspeech to your catkin workspace*
 
