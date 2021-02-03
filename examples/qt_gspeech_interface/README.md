@@ -65,21 +65,7 @@ rosservice call /qt_gspeech_service "language:'' options: - '' timeout:10"
 ssh qtrobot@192.168.100.1
 ```
 
-### ***2.1 Install python3 modules***
-
-```bash
-sudo apt-get update && sudo apt-get install python3-pip python3-yaml portaudio19-dev
-```
-
-```bash
-pip3 install --user --upgrade pip
-```
-
-```bash
-pip3 install rospkg pyaudio six
-```
-
-### ***2.2 Prepare QTrobot (get files and setup the environment)***
+### ***2.1 Prepare QTrobot (get files and setup the environment)***
 
 
 - **Clone the github repository into "robot/code" folder**
@@ -109,12 +95,36 @@ run_script "start_qt_gspeech_interface.sh"
     Below the last command *"run_script"* copy and paste the command above. Save it (Ctrl+O) and exit (Ctrl+X).
 
 
-### ***2.3 Setup Google Cloud***
+### ***2.2 Install python3 virtualenv and portaudio***
+
+```bash
+sudo apt-get update && sudo apt-get install python3-venv portaudio19-dev
+```
+
+### ***2.3 Create Python3 virtualenv and install requirements***
+
+!!! info ""
+    Install everything inside project folder (qt_gspeech_interface)
+
+```bash
+python3 -m venv .venv && source .venv/bin/activate
+```
+
+```bash
+pip3 install --upgrade "pip < 21.0"
+```
+
+```bash
+pip3 install -r requirements.txt
+```
+
+
+
+### ***2.4 Setup Google Cloud***
 
  - Follow the [instructions](https://cloud.google.com/speech-to-text/docs/quickstart-client-libraries) to setup your Google Console and SpeechToText
  - From 1.Step ***Download a private key as JSON*** and save it inside ***"~/robot/code/tutorials/examples/qt_gspeech_interface"*** folder you will need it to run the application.
  - Install [Google Cloud SDK](https://cloud.google.com/sdk/docs/install) and Google Cloud Python SDK (4.step)
- - Install [Client Library](https://cloud.google.com/speech-to-text/docs/quickstart-client-libraries#install_the_client_library) --> use **pip3**
 
 ### ***2.4 Link your folder and build catkin qt_gspeech_interface package***
 
@@ -149,11 +159,21 @@ rosservice call /qt_gspeech_service "language:'' options: - '' timeout:10"
 
 ### ***2.6 Additional***
 
+*If you want to call this service outside of QTRP environment then you should copy content of qtpc_gspeech to your catkin workspace*
 
-- **copy qt_gspeech_headers to your PC or QTPC**
+- **copy qtpc_gspeech to your PC or QTPC**
 
-*If you want to call this service outside of QTRP environment then you should copy content of qt_gspeech_headers to your catkin workspace*
+!!! info ""
+    These commands include "robot/code" folder just for the purpose of the example. Include your folder name in the command.
 
 ```bash
-cd ~/robot/code/tutorials/examples/qt_gspeech_interface/qt_gspeech_headers && cp -r * ~/catkin_ws/devel/
+cd ~/robot/code && git clone https://github.com/luxai-qtrobot/tutorials.git
+```
+
+```bash
+cd ~/catkin_ws/src/ && ln -s ~/robot/code/tutorials/examples/qt_gspeech_interface/qtpc_gspeech qt_gspeech_interface
+```
+
+```bash
+cd ~/catkin_ws && catkin_make --pkg qt_gspeech_interface
 ```
