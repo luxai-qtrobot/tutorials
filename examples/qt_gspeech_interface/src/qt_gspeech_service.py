@@ -176,8 +176,8 @@ class QTrobotGoogleSpeech(object):
             transcript = result.alternatives[0].transcript
             if not result.is_final:
                 if context:
-                    for option in context::
-                        if option == transcript.lower().strip()
+                    for option in context:
+                        if option == transcript.lower().strip():
                             return transcript
             else:
                  return transcript
