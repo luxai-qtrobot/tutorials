@@ -117,13 +117,14 @@ class QTrobotGoogleSpeech(object):
         print("options:", len(req.options), req.options)
         print("language:", req.language)
         print("timeout:", str(req.timeout))
-        answer_context = []
         speech_context = None
-        if len(req.options)>1:
-            for option in req.options:
-                if option.strip():
-                    answer_context.append(option.lower().strip())
-            speech_context = types.SpeechContext(phrases = answer_context) if len(answer_context) else None
+        answer_context = []
+        for option in req.options:
+            if option.strip():
+                answer_context.append(option.lower().strip() if '$' not in option else option.strip())        
+                
+        if answer_context:
+            speech_context = types.SpeechContext(phrases = answer_context)
             config = types.RecognitionConfig(
                 encoding=enums.RecognitionConfig.AudioEncoding.LINEAR16,
                 sample_rate_hertz=16000,
@@ -137,7 +138,7 @@ class QTrobotGoogleSpeech(object):
                 language_code= str(req.language.strip()) if req.language.strip() else "en-US"
             )
 
-        streaming_config = types.StreamingRecognitionConfig(config=config, interim_results=True)
+        streaming_config = types.StreamingRecognitionConfig(config=config, interim_results=True, single_utterance=True)
         with MicrophoneStream(self.stream_buff) as mic:
             audio_generator = mic.generator()
             requests = (
@@ -175,8 +176,8 @@ class QTrobotGoogleSpeech(object):
             transcript = result.alternatives[0].transcript
             if not result.is_final:
                 if context:
-                    for option in context:
-                        if option == transcript.lower().strip():
+                    for option in context::
+                        if option == transcript.lower().strip()
                             return transcript
             else:
                  return transcript
