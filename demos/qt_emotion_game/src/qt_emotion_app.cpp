@@ -7,7 +7,7 @@
 #include "qt_idle_app/suspend.h"
 
 #include <boost/thread/thread.hpp>
-#include <yaml-cpp/yaml.h>
+
 
 
 /**
@@ -16,7 +16,7 @@
 class PlayStateCB : public rfsm::StateCallback {
 public:
     PlayStateCB (ros::NodeHandle& nh, rfsm::StateMachine& fsm, QTrobotServiceHelper& srvHelper):
-        rfsm(fsm), inState(false), serviceHelper(srvHelper), with_audio_files(false) {
+        rfsm(fsm), inState(false), serviceHelper(srvHelper), with_audio_files(false), node(nh) {
         srand(time(0));
         if(!nh.getParam("/qt_emotion_app/with_audio_files", with_audio_files)) {
             ROS_WARN_STREAM("Cannot find param  /qt_emotion_app/with_audio_files.");
@@ -26,24 +26,6 @@ public:
                 ROS_WARN_STREAM("Cannot find param  /qt_emotion_app/audio_path.");
             }
             ROS_INFO_STREAM("Using audios from '"<<audio_path<<"'");
-        }
-        else {
-            std::string speech_message_file;
-            if(!nh.getParam("/qt_emotion_app/speech_message_file", speech_message_file)) {
-                ROS_WARN_STREAM("Cannot find param  /qt_emotion_app/speech_message_file.");
-            }
-            ROS_INFO_STREAM("Loading speech messages from '"<<speech_message_file<<"'");
-
-            try{
-                speechMessages = YAML::LoadFile(speech_message_file);
-            }
-            catch(YAML::BadFile) {
-                ROS_ERROR_STREAM("Cannot load speech file '"<<speech_message_file<<"'");
-                ros::shutdown();
-                return;
-            }
-
-            ROS_INFO_STREAM("Using speech in " << speechMessages["language"].as<std::string>());
         }
     }
 
@@ -55,7 +37,8 @@ public:
         ROS_INFO("Play.entry()");
         if(!with_audio_files) {
             // set speech language to English
-            std::string lang = speechMessages["language"].as<std::string>();
+            std::string lang;
+            node.getParam("/qt_emotion_app/language", lang);
             if(!serviceHelper.speechConfig(lang)) {
                 ROS_WARN_STREAM("Cannot set speech language to " << lang);
             }
@@ -121,9 +104,11 @@ public:
                 ROS_WARN_STREAM("Could not play audio " << message);
         }
         else {
+            std::string talk_msg;
+            node.getParam("/qt_emotion_app/messages/"+message, talk_msg);
             try{
-                ROS_INFO_STREAM("talking '" <<speechMessages[message].as<std::string>() <<"'");
-                ret = serviceHelper.talkText(speechMessages[message].as<std::string>());
+                ROS_INFO_STREAM("talking '" << talk_msg <<"'");
+                ret = serviceHelper.talkText(talk_msg);
             } catch(...) {
                 ret = false;
             }
@@ -134,6 +119,7 @@ public:
     }
 
 private:
+    ros::NodeHandle& node;
     bool inState;
     bool interrupted;
     std::string shown_lables;
@@ -141,7 +127,6 @@ private:
     rfsm::StateMachine& rfsm;
     std::string audio_path;
     bool with_audio_files;
-    YAML::Node speechMessages;
     QTrobotServiceHelper& serviceHelper;
 };
 

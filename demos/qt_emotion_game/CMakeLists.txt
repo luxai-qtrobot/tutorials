@@ -156,7 +156,7 @@ add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_gencpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(${PROJECT_NAME}
-                       ${catkin_LIBRARIES} yaml-cpp rFSM)
+                       ${catkin_LIBRARIES} rFSM)
 
 #############
 ## Install ##

@@ -1,10 +1,12 @@
-language: fr_FR
-emotion_recognition_001: "Ceci est un visage heureux. . Moi aussi je suis heureux!."
-emotion_recognition_002: "Oh non! ceci est un visage triste."
-emotion_recognition_003: "Quand je suis triste; J'essaie de penser aux choses que j'aime; et puis; je me sens heureux! ."
-emotion_recognition_004: "Ceci est un visage en colère."
-emotion_recognition_005: "Quand je suis en colère; J'essaye de me calmer; en prenant une profonde respiration."
-emotion_recognition_006: "Ceci est un visage dégoûté."
-emotion_recognition_007: "Quand il y a une mauvaise odeur; ou quand nous mangeons quelque chose qui a mauvais goût; nous sommes dégoûtés."
-emotion_recognition_008: "Ceci est un visage surpris."
-emotion_recognition_009: "Quand nous entendons une bonne nouvelle; à laquelle nous ne nous attendions pas; nous sommes surpris."
+qt_emotion_app:
+  language: fr_FR
+  messages:
+    emotion_recognition_001: "Ceci est un visage heureux. . Moi aussi je suis heureux!."
+    emotion_recognition_002: "Oh non! ceci est un visage triste."
+    emotion_recognition_003: "Quand je suis triste; J'essaie de penser aux choses que j'aime; et puis; je me sens heureux! ."
+    emotion_recognition_004: "Ceci est un visage en colère."
+    emotion_recognition_005: "Quand je suis en colère; J'essaye de me calmer; en prenant une profonde respiration."
+    emotion_recognition_006: "Ceci est un visage dégoûté."
+    emotion_recognition_007: "Quand il y a une mauvaise odeur; ou quand nous mangeons quelque chose qui a mauvais goût; nous sommes dégoûtés."
+    emotion_recognition_008: "Ceci est un visage surpris."
+    emotion_recognition_009: "Quand nous entendons une bonne nouvelle; à laquelle nous ne nous attendions pas; nous sommes surpris."

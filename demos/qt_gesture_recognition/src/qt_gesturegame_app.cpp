@@ -3,7 +3,6 @@
 #include <sstream>
 #include <std_msgs/Float64MultiArray.h>
 #include <boost/thread/thread.hpp>
-#include <yaml-cpp/yaml.h>
 #include "qt_gesturegame_app/qt_gesturegame_app.h"
 #include "qt_idle_app/suspend.h"
 
@@ -19,7 +18,7 @@ static int current_user_id = -1;
 class PlayStateCB : public rfsm::StateCallback {
 public:
     PlayStateCB (ros::NodeHandle& nh, rfsm::StateMachine& fsm, QTrobotServiceHelper& srvHelper):
-        rfsm(fsm), serviceHelper(srvHelper){
+        rfsm(fsm), serviceHelper(srvHelper), node(nh){
         srand(time(0));
         if(!nh.getParam("/qt_gesturegame_app/with_audio_files", with_audio_files)) {
             ROS_WARN_STREAM("Cannot find param  /qt_gesturegame_app/with_audio_files.");
@@ -30,31 +29,14 @@ public:
             }
             ROS_INFO_STREAM("Using audios from '"<<audio_path<<"'");
         }
-        else {
-            std::string speech_message_file;
-            if(!nh.getParam("/qt_gesturegame_app/speech_message_file", speech_message_file)) {
-                ROS_WARN_STREAM("Cannot find param  /qt_gesturegame_app/speech_message_file.");
-            }
-            ROS_INFO_STREAM("Loading speech messages from '"<<speech_message_file<<"'");
-
-            try{
-                speechMessages = YAML::LoadFile(speech_message_file);
-            }
-            catch(YAML::BadFile) {
-                ROS_ERROR_STREAM("Cannot load speech file '"<<speech_message_file<<"'");
-                ros::shutdown();
-                return;
-            }
-
-            ROS_INFO_STREAM("Using speech in " << speechMessages["language"].as<std::string>());
-        }
     }
 
     virtual void entry() {
         ROS_INFO("Play.entry()");
         if(!with_audio_files) {
             // set speech language
-            std::string lang = speechMessages["language"].as<std::string>();
+            std::string lang;
+            node.getParam("/qt_gesturegame_app/language", lang);
             if(!serviceHelper.speechConfig(lang)) {
                 ROS_WARN_STREAM("Cannot set speech language to " << lang);
             }
@@ -63,8 +45,11 @@ public:
         prevLevel = -1;
         if(with_audio_files)
             serviceHelper.talkAudioPlayGesture("memory_game_001", "QT/challenge", 2.0, true, audio_path);
-        else
-            serviceHelper.talkTextPlayGesture(speechMessages["memory_game_001"].as<std::string>(), "QT/challenge", 2.0, true);
+        else{
+            std::string msg;
+            node.getParam("/qt_gesturegame_app/messages/memory_game_001", msg);
+            serviceHelper.talkTextPlayGesture(msg, "QT/challenge", 2.0, true);
+        }
         ros::Duration(1.0).sleep();
 
         // doo
@@ -121,10 +106,14 @@ public:
                 while(!read && !ros::isShuttingDown() && !interrupted) {
                     if((ros::Time::now() - start_read_time).toSec() > 10.0) {
                         ROS_INFO("timeout! Okay! it seems you do not want to play anymore!");                        
-                        if(with_audio_files)
+                        if(with_audio_files){
                             serviceHelper.talkAudioPlayGesture("memory_game_006", "QT/angry", 1.0, true, audio_path);
-                        else
-                            serviceHelper.talkTextPlayGesture(speechMessages["memory_game_006"].as<std::string>(), "QT/angry", 1.0, true);
+                        }
+                        else{
+                            std::string msg;
+                            node.getParam("/qt_gesturegame_app/messages/memory_game_006", msg);
+                            serviceHelper.talkTextPlayGesture(msg, "QT/angry", 1.0, true);
+                        }
                         interrupted = true;
                         break;
                     }
@@ -224,8 +213,10 @@ public:
         }
         else {
             try{
-                ROS_INFO_STREAM("talking '" <<speechMessages[message].as<std::string>() <<"'");
-                ret = serviceHelper.talkText(speechMessages[message].as<std::string>());
+                std::string talk_msg;
+                node.getParam("/qt_gesturegame_app/messages/"+message, talk_msg);
+                ROS_INFO_STREAM("talking '" << talk_msg <<"'");
+                ret = serviceHelper.talkText(talk_msg);
             } catch(...) {
                 ret = false;
             }
@@ -237,6 +228,7 @@ public:
 
 
 private:
+    ros::NodeHandle& node;
     bool interrupted;
     int prevLevel;
     ros::Time start_time;
@@ -247,7 +239,6 @@ private:
     rfsm::StateMachine& rfsm;
     std::string audio_path;
     bool with_audio_files;
-    YAML::Node speechMessages;
     QTrobotServiceHelper& serviceHelper;
 };
 
