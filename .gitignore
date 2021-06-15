@@ -1,4 +1,5 @@
 *.pyc
+venv
 CMakeLists.txt.user
 build
 site
