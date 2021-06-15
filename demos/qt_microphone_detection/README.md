@@ -7,46 +7,51 @@ Check it in this video:
 
 NOTICE: You must run this demo on QTRP (head)!!!!
 
-This demo needs some prerequisites:
+### Setting up and installing the requiremnts  
+This demo needs some prerequisites. let's first create python virtual environment to keep everyting clean.
 ```
-sudo apt-get update
-sudo pip install pyusb click
+python3 -m venv venv
+source venv/bin/activate
 ```
-*OR*
+install required packages using pip in your virtual environment 
 ```
-sudo apt-get update
-sudo `which pip` install pyusb click
+pip install -r requirements.txt
 ```
 
-PyUSB needs root privileges, if you run the script without root you will see something like this:
+To run the demo go to *qt_microphone_detection* folder and run *voice_direction* python script:
+```
+python voice_direction.py
+```
+Now you can speak or sing around the QTrobot and he will follow your voice.
+
+
+### PyUSB permission error 
+
+PyUSB needs root privileges. if you run the above example, you may get the following error:
 ```
 usb.core.USBError: [Errno 13] Access denied (insufficient permissions)
 ```
+
 To fix this error we need to set up a udev rule file for the microphone to be able to access it with normal user.
-* Create a udev rules file:
+
+* Create a file called *90-mic.rules* in */etc/udev/rules.d/*:
+
+```
+sudo nano /etc/udev/rules.d/90-mic.rules
+```
+* and add the following content
+* 
 ```
 ACTION=="add", SUBSYSTEMS=="usb", ATTRS{idVendor}=="2886", ATTRS{idProduct}=="0018", MODE="660", GROUP="plugdev"
 ```
-Create this file in folder */etc/udev/rules.d/*. For example usual structure of the file name can be *Number-Name.rules*
-
-* Add the user to the *plugdev* group:
-```
-adduser username plugdev
-```
-
 * Reload udev system to see your changes:
 ```
 sudo udevadm control --reload
 sudo udevadm trigger
 ```
+
 * Reboot QTrobot:
 ```
 sudo reboot
 ```
 
-To run the demo go to *qt_microphone_detection* folder and run *voice_direction* python script:
-```
-cd qt_microphone_detection/
-python voice_direction.py
-```
-Now you can speak or sing around the QTrobot and he will follow your voice.
