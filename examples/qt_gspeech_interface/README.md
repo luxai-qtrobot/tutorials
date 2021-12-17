@@ -154,7 +154,9 @@ rosservice list
 - **To run:**
 
 ```bash
-rosservice call /qt_gspeech_service "language:'' options: - '' timeout:10"
+rosservice call /qt_robot/speech/recognize "language: 'en_US'
+options:[]
+timeout: 0"
 ```
 
 ### ***2.7 Additional***
