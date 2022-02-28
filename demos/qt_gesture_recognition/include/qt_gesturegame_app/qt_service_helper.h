@@ -261,7 +261,7 @@ public:
       return cmd.response.status;
     }
 
-    bool speechConfig(std::string language, int pitch=150, int speed=80) {
+    bool speechConfig(std::string language, int pitch=0, int speed=0) {
       qt_robot_interface::speech_config cmd;
       cmd.request.language = language;
       cmd.request.pitch = pitch;
