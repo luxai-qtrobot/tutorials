@@ -1,0 +1,4 @@
+<launch>
+  <node name="gptbot" pkg="gpt_demo" type="GPTBot.py" output="screen"></node>
+</launch>
+
