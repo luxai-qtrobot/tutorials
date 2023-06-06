@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import random
 import time
 import concurrent.futures
@@ -58,7 +59,7 @@ class Synchronizer():
 class QTGPTGspeechBot():
     """QTrobot talks with you via GPT3 and Google Speech"""
 
-    def __init__(self, config_path="./config/config.json"):
+    def __init__(self, config_path="/home/qtrobot/code/tutorials/examples/gpt_demo/config/config.json"):
         self.config_path = config_path  
         with open(self.config_path) as f:
             self.config = json.load(f)
