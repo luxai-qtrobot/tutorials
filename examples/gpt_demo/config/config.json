@@ -1,6 +1,0 @@
-{
-    "chatengine":{
-        "OPENAI_GPT_MODEL":false,
-        "OPENAI_KEY":""
-    }
-}

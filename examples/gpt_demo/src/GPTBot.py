@@ -4,12 +4,14 @@ import time
 import concurrent.futures
 import asyncio
 import rospy
-import json
+import text2emotion as te
 from utils import aimodel
 from std_msgs.msg import String
 from qt_robot_interface.srv import *
 from qt_gspeech_app.srv import *
+import nltk
 from nltk.tokenize import sent_tokenize, word_tokenize
+from nltk.sentiment import SentimentIntensityAnalyzer
 
 class Synchronizer():
     """
@@ -59,14 +61,14 @@ class Synchronizer():
 class QTGPTGspeechBot():
     """QTrobot talks with you via GPT3 and Google Speech"""
 
-    def __init__(self, config_path="/home/qtrobot/code/tutorials/examples/gpt_demo/config/config.json"):
-        self.config_path = config_path  
-        with open(self.config_path) as f:
-            self.config = json.load(f)
-        if self.config["chatengine"]["OPENAI_GPT_MODEL"]:
-            self.aimodel = aimodel.ChatGPT(self.config)
+    def __init__(self):
+        nltk.download('vader_lexicon')
+        self.chatgpt_model = rospy.get_param("/gpt_demo/chatengine/OPENAI_CHATGPT_MODEL", False) 
+        if self.chatgpt_model:
+            self.aimodel = aimodel.ChatGPT()
         else:
-            self.aimodel = aimodel.Davinci3(self.config) 
+            self.aimodel = aimodel.Davinci3() 
+        self.sia = SentimentIntensityAnalyzer()
         self.finish = False
         self.defaultlanguage = 'en-US'        
         self.error_feedback = "Sorry. It seems I have some technical problem. Please try again."
@@ -75,6 +77,7 @@ class QTGPTGspeechBot():
         self.emotion_pub = rospy.Publisher('/qt_robot/emotion/show', String, queue_size=2)
         self.gesture_pub = rospy.Publisher('/qt_robot/gesture/play', String, queue_size=2)
         self.talkText = rospy.ServiceProxy('/qt_robot/behavior/talkText', behavior_talk_text)
+        self.speechConfig = rospy.ServiceProxy('/qt_robot/speech/config', speech_config)
         self.recognizeQuestion = rospy.ServiceProxy('/qt_robot/gspeech/recognize', speech_recognize) 
 
         # block/wait for ros service
@@ -98,7 +101,7 @@ class QTGPTGspeechBot():
                 self.gesture_pub.publish(random.choice(["yes"]))
             elif 'no' in words:
                 self.gesture_pub.publish(random.choice(["no"]))
-            elif len(words) > 10 and random.choice([0, 1]) == 0:
+            elif len(words) > 5 and random.choice([0, 1]) == 0:
                 self.gesture_pub.publish(random.choice(["talk", "crossed_arm"]))
             print("QTrobot:", sentence)
             self.talkText(sentence)      
@@ -108,23 +111,86 @@ class QTGPTGspeechBot():
     def think(self):
         if random.choice([0, 1]) == 0:
             self.gesture_pub.publish(random.choice(["QT/angry", "think_right"]))
-            self.emotion_pub.publish(random.choice(["QT/confused", "QT/calming_down"]))
+            self.emotion_pub.publish("QT/confused")
         return True
 
     def bored(self):
         if random.choice([0, 1]) == 0:
             self.gesture_pub.publish(random.choice(["QT/angry"]))
-            self.talkText(random.choice(["#COUGH02","#BREATH01#","#THROAT02#"]))
+            self.talkText(random.choice(["#THROAT01#","#BREATH01#","#THROAT02#"]))
 
     def show_sentiment(self, sentiment):
-        if sentiment == 'positive':
-            self.emotion_pub.publish(random.choice(["QT/happy", "QT/showing_smile", "QT/calming_down"]))
-        elif sentiment == 'negative':
-            self.emotion_pub.publish(random.choice(["QT/confused", "QT/sad"]))                    
+        if sentiment['emotion'] == 'happy':
+            self.emotion_pub.publish("QT/happy")
+            self.gesture_pub.publish(random.choice(["QT/happy", "QT/monkey"]))
+            self.talkText(random.choice(["Yeah!","WOW!","Fantastic!", "This is great!"]))
+        elif sentiment['emotion'] == 'angry':
+            self.emotion_pub.publish("QT/angry")
+            self.gesture_pub.publish(random.choice(["QT/angry", "QT/challenge"]))
+            self.talkText(random.choice(["That's terrible", "That's not good"]))    
+        elif sentiment['emotion'] == 'surprise':
+            if sentiment['compound'] > 0: 
+                self.emotion_pub.publish("QT/surprise")
+                self.gesture_pub.publish(random.choice(["QT/surprise", "QT/show_QT"]))
+                self.talkText(random.choice(["Oh WOW!", "That's amazing!"]))
+            else:
+                self.emotion_pub.publish("QT/surprise")
+                self.gesture_pub.publish(random.choice(["QT/angry", "QT/surprise"]))
+                self.talkText(random.choice(["Oh no!", "Oh my goodness, no!"]))
+        elif sentiment['emotion'] == 'sad':
+            self.emotion_pub.publish("QT/sad")    
+            self.gesture_pub.publish(random.choice(["QT/sad", "crossed_arm"]))
+            self.talkText(random.choice(["Oh no!", "No way!", "No, really?"]))
+        elif sentiment['emotion'] == 'fear':
+            self.emotion_pub.publish("QT/afraid")
+            self.gesture_pub.publish(random.choice(["QT/sad", "crossed_arm"]))
+            self.talkText(random.choice(["Oh gosh!", "Oh, I understand", "That must be worrisome!","Sorry to hear that!"]))
+        elif sentiment['emotion'] == 'neutral':
+            self.emotion_pub.publish("QT/neutral") 
+            self.gesture_pub.publish("QT/neutral")                   
 
+    def get_sentiment(self, sentence):
+        response_sia = self.sia.polarity_scores(sentence)
+        response_te = te.get_emotion(sentence)
+        emotions = [response_te.get("Happy"), response_te.get("Sad"), response_te.get("Angry"), response_te.get("Surprise"), response_te.get("Fear"), response_sia.get("neu")]
+        em = max(emotions)
+        em_index = emotions.index(em)
+        if em_index == 0 and em >= 0.9 and response_sia.get('compound') > 0:
+            return {'emotion': 'happy', 'compound':response_sia.get('compound')}
+        elif em_index == 1 and em >= 0.9 and response_sia.get('compound') < 0:
+            return {'emotion': 'sad', 'compound':response_sia.get('compound')} 
+        elif em_index == 2 and em >= 0.9 and response_sia.get('compound') < 0:
+            return {'emotion': 'angry', 'compound':response_sia.get('compound')}
+        elif em_index == 3 and em >= 0.9 and response_sia.get('compound') > 0:
+            return {'emotion': 'surprise', 'compound':response_sia.get('compound')} 
+        elif em_index == 3 and em >= 0.9 and response_sia.get('compound') < 0:
+            return {'emotion': 'surprise', 'compound':response_sia.get('compound')}
+        elif em_index == 4 and em >= 0.9:
+            return {'emotion': 'fear', 'compound':response_sia.get('compound')}
+        else:
+            return {'emotion': 'neutral', 'compound':response_sia.get('compound')}
+        
+    def refine_sentence(self, text):
+        if not text: 
+            raise TypeError     
+        tokenized = sent_tokenize(text)
+        last_sentence = tokenized[-1].strip()        
+        is_finished = last_sentence.endswith('.') or last_sentence.endswith('!') or last_sentence.endswith('?')
+        if not is_finished:
+            tokenized.pop()
+            if not tokenized:
+                return text
+            return ' '.join(tokenized)
+        return text
     
+    def intro(self):
+        response =  self.aimodel.generate("Who are you?")
+        print("Intro: ",response)
+        self.talkText(response) 
+
+
     def start(self):
-        self.talkText("How can I help you?")
+        self.intro()
         while not rospy.is_shutdown() and not self.finish:            
             print('listenting...') 
             try:    
@@ -137,6 +203,7 @@ class QTGPTGspeechBot():
 
             print('Human:', recognize_result.transcript)
             prompt = recognize_result.transcript
+            self.show_sentiment(self.get_sentiment(prompt))
             words = word_tokenize(prompt.lower())
             if 'stop' in words:
                 self.gesture_pub.publish(random.choice(["QT/bye"]))
@@ -146,7 +213,7 @@ class QTGPTGspeechBot():
             bs = Synchronizer()
             results = bs.sync([
                 (0, lambda: self.aimodel.generate(prompt)),
-                (0.5, lambda: self.think())
+                (0.5, lambda: self.think()),
             ])
             if isinstance(results[0], bool):                
                 response = results[1]
@@ -156,8 +223,8 @@ class QTGPTGspeechBot():
             if not response:
                 response = self.error_feedback
 
-            self.speak(response)
-
+            self.speak(self.refine_sentence(response))
+            
         print("QTGptBot_node Stopping!")
         self.finish = False
 
