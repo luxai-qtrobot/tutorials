@@ -129,3 +129,48 @@ class ChatGPT:
                 print(e)
             print(f"retrying {i} ...")
         return None
+    
+
+class FastChat:
+    def __init__(self):
+        openai.api_key = 'EMPTY'
+        openai.api_base = rospy.get_param("/gpt_demo/fastchat/api_base", 'http://localhost:6000/v1')
+        self.messages = []
+        self.model = rospy.get_param("/gpt_demo/fastchat/model", 'vicuna-7b-v1.3')
+        self.memory_size = rospy.get_param("/gpt_demo/fastchat/memory_size", 5)
+        self.max_token_length = rospy.get_param("/gpt_demo/fastchat/max_token_length", 4096)
+        self.character = rospy.get_param("/gpt_demo/fastchat/character", "qtrobot")        
+        self.system_message = rospy.get_param("/gpt_demo/fastchat/prompt", "")
+        
+    def create_prompt(self, message):
+         # cut off long input
+        if len(message) > self.max_token_length:
+            message = message[:self.max_token_length]
+        
+        if not self.messages:
+            self.messages.append({"role": "system", "content":self.system_message})
+            self.messages.append({'role': 'user', 'content': message}) 
+        else:
+            if (len(self.messages) > self.memory_size):
+                self.messages.pop(1)
+            self.messages.append({"role": "user", "content":message})
+        return self.messages
+    
+
+    def generate(self, message):     
+        for i in range(1,10):
+            try:
+                response = openai.ChatCompletion.create(
+                    model=self.model,
+                    messages=self.create_prompt(message),
+                    temperature=rospy.get_param("/gpt_demo/fastchat/temperature", 0.8),
+                    max_tokens=rospy.get_param("/gpt_demo/fastchat/max_tokens", 41),
+                    frequency_penalty=rospy.get_param("/gpt_demo/fastchat/frequency_penalty", 0.6),
+                    presence_penalty=rospy.get_param("/gpt_demo/fastchat/presence_penalty", 0.6))
+                text = response['choices'][0]['message']
+                self.messages.append({"role": "assistant", "content": text.content})
+                return text.content
+            except Exception as e:
+                print(e)
+            print(f"retrying {i} ...")
+        return None
