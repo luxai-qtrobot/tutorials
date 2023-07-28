@@ -1,7 +1,7 @@
 gpt_demo:
   chatengine:
     OPENAI_KEY: ""
-    engine: "fastchat"
+    engine: "chatgpt"
   chatgpt:
     max_token_length: 4096
     temperature: 0.8
