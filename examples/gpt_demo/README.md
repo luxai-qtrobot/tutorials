@@ -20,7 +20,7 @@ Add OpenAI key to gpt_bot.yaml file:
 "OPENAI_KEY":""
 ```
 
-To use OpenAI *gpt-3.5-turbo* model set  `engine: "chatgpt"` or if you want to use *text-davinci-003* set it to `engine: "davinci13"`.
+To use OpenAI *gpt-3.5-turbo* model set  `engine: "chatgpt"` or if you want to use *text-davinci-003* set it to `engine: "davinci3"`.
 
 ### Character configuration
 
