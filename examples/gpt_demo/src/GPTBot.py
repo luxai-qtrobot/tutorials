@@ -95,7 +95,7 @@ class QTChatBot():
         
     def talk(self, text):
         print('QT talking:', text)
-        self.self.talkText(text)        
+        self.talkText(text)        
 
 
     def speak(self, text):
