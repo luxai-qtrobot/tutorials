@@ -1,6 +1,8 @@
 <launch>
   <rosparam file="$(find offline_conversation)/config/offline_conversation.yaml" command="load"/>
   <env name="NLTK_DATA" value="/home/qtrobot/robot/nltk/data/"/>
-  <node name="gptbot" pkg="offline_conversation" type="offline_conversation_node.py" output="screen"></node>
+  <node pkg="offline_conversation" name="fastchat_server" type="start_fastchat_server.sh" output="screen"></node>
+  <node pkg="offline_conversation" name="offline_conversation" type="offline_conversation_node.py" output="screen"></node>
+
 </launch>
 

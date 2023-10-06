@@ -5,4 +5,5 @@ build
 site
 service.json
 .venv
+*.log
 __pycache__
