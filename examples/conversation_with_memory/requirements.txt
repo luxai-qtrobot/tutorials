@@ -1,0 +1,27 @@
+rospkg
+pyyaml
+openai
+nltk
+text2emotion
+emoji==1.6.3
+
+# for RAG
+langchain
+langchain-community
+langchain_openai
+unstructured
+tiktoken
+faiss-cpu 
+
+# for NVIDIA torch
+export TORCH_INSTALL=~/robot/torch/torch-2.1.0a0+41361538.nv23.06-cp38-cp38-linux_aarch64.whl
+python3 -m pip install --no-cache $TORCH_INSTALL
+# for NUC, just install sentence-transformers
+sentence-transformers
+
+# for fastchat 
+fschat[model_worker]
+psutil
+accelerate
+protobuf
+# pip3 install "fschat[model_worker]==0.2.30" for Python 3.8
