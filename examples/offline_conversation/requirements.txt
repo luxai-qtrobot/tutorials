@@ -1,0 +1,4 @@
+openai
+nltk
+text2emotion
+emoji==1.6.3

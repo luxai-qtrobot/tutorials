@@ -1,0 +1,5 @@
+<launch>
+  <rosparam file="$(find gpt_demo)/config/gpt_bot.yaml" command="load"/>
+  <node name="gptbot" pkg="gpt_demo" type="GPTBot.py" output="screen"></node>
+</launch>
+

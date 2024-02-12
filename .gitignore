@@ -1,8 +1,10 @@
 *.pyc
+venv
 CMakeLists.txt.user
 build
 site
 service.json
 .venv
 venv
-
+*.log
+__pycache__

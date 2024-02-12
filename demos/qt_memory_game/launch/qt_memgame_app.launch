@@ -1,8 +1,9 @@
 <launch>
+  <rosparam file="$(find qt_memgame_app)/data/speech/message_en.yaml" command="load"/>
+
   <node name="qt_memgame_app" pkg="qt_memgame_app" type="qt_memgame_app" output="screen">
     <param name="fsm" value="$(find qt_memgame_app)/fsm/memory_game.lua"/>
     <param name="with_audio_files" value="false"/>
     <param name="audio_path" value="$(find qt_memgame_app)/data/audio/Romanian"/>
-    <param name="speech_message_file" value="$(find qt_memgame_app)/data/speech/message_en.yaml"/>
   </node>
 </launch>
