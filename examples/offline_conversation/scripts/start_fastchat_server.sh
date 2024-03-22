@@ -8,8 +8,9 @@ python3 -m fastchat.serve.controller &
 PID1=$!
 
 
-echo "Running fastchat.serve.model_worker with vicuna-13b-v1.5 model"
-python3 -m fastchat.serve.model_worker --model-path /home/qtrobot/robot/huggingface/models/models--lmsys--vicuna-13b-v1.5 &
+echo "Running fastchat.serve.model_worker with $MODEL_NAME model"
+# python3 -m fastchat.serve.model_worker --model-path /home/qtrobot/robot/huggingface/models/$MODEL_NAME &
+yes y | python3 -m fastchat.serve.model_worker --model-path /home/qtrobot/robot/huggingface/models/$MODEL_NAME &
 PID2=$!
 
 python3 -m fastchat.serve.openai_api_server --host localhost --port 6000 &

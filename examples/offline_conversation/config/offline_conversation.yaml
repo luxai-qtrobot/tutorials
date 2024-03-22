@@ -6,7 +6,7 @@ offline_conversation:
 
   fastchat:
     api_base: "http://localhost:6000/v1"
-    model: "models--lmsys--vicuna-13b-v1.5"
+    model: "models--lmsys--vicuna-13b-v1.5"  # openbmb small model: models--openbmb--MiniCPM-2B-dpo-bf16
     max_token_length: 2048 # (limit is 4096)
     temperature: 0.8
     # max_tokens: 41 (not used)
