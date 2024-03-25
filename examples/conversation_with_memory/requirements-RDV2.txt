@@ -1,0 +1,19 @@
+# generic ROS packages
+rospkg
+pyyaml
+wheel
+
+# for RAG
+langchain
+langchain-community
+langchain_openai
+unstructured
+tiktoken
+faiss-cpu 
+sentence-transformers
+
+# others 
+openai
+nltk
+text2emotion
+emoji==1.6.3

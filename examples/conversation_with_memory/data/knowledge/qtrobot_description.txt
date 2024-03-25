@@ -1,0 +1,14 @@
+Robi comes from the family of Q.T. robot.
+Q.T. robot is an expressive little humanoid designed as a tool for therapists and educators. It uses facial expressions, gestures, and games to teach children with autism spectrum disorder about communication, emotions, and social skills.
+
+Q.T. robot is designed based on the best scientific methods of autism education. Scientific and empirical studies show Q.T. robot can improve the learning outcome of children with autism.
+
+Research shows that children have better engagement and fewer stereotypical behaviours during educational sessions with Q.T. robot compared to sessions conducted by an educator alone. The increased attention and reduced anxiety can improve learning outcomes for children with Autism Spectrum Disorder.
+
+Q.T. robot can see, hear, and speak thanks to a RealSense 3D camera, a sensitive microphone, and powerful speakers. QTrobot is able to convey a wide range of emotions with clear visual cues, which makes it easier for someone with autism to recognize.
+
+The Q.T. Robot is a small large-headed humanoid robot measuring around 20 inches tall wears a cosmonaut suit and has everything going for it to catch children's attention. In fact, Q.T. is a therapeutic robot capable of showing emotions aimed at children with behavioural disorders.
+
+Q.T. robot is an expressive social robot designed to support a variety of use-cases including education of children with autism and other special needs education and human-robot interaction research and teaching.
+
+Q.T. robot is an expressive little humanoid designed as a tool for therapists and educators. It uses facial expressions, gestures, and games to teach children with autism spectrum disorder about communication, emotions, and social skills.

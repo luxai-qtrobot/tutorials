@@ -1,0 +1,5 @@
+<launch>
+  <rosparam file="$(find conversation_with_memory)/config/conversation_with_memory.yaml" command="load"/>
+  <env name="NLTK_DATA" value="/home/qtrobot/robot/nltk/data/"/>
+  <node pkg="conversation_with_memory" name="conversation_with_memory" type="start_conversation_with_memory.sh" output="screen"></node>
+</launch>
