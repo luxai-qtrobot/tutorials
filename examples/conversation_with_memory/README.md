@@ -3,19 +3,11 @@
 This example shows how retrieval-augmented generation (RAG) techniques can be used to provide a social agent with a consistent personality and long-term memory.
 
 This example implements parts of the interaction as online and offline options:
-- Speech recognition: online with google Speech or offline with Riva of Vosk;
-- Language generation: online with OpenAI or offline with FastChat Vicuna1.5-13B
-- RAG: online embeddings with OpenAI or offline embeddings with all-MiniLM-L6-v2 (sentence transformers)
+- **Speech recognition**: online with google Speech or offline with Riva of Vosk;
+- **Language generation**: online with OpenAI or offline with FastChat Vicuna1.5-13B
+- **RAG**: online embeddings with OpenAI or offline embeddings with all-MiniLM-L6-v2 (sentence transformers)
 
 You can combine online and offline components as you prefer if you are using QTrobot AI@Edge. Intel-based versions of QTrobot are better suitable for online language generation, but other options are still available. For instance, you can use Vosk for offline speech recognition, encode your knowldge on device using local embeddings and use cloud-based generative models to produce fluent language from the context that you retrieve offline. 
-
-We recommend to install all dependencies in a virtual environment (say `.venv`). General dependencies for all combinations are:
-- rospkg
-- pyyaml
-- openai (even if you plan to work with offline language generation, because FastChat implements the same interface).
-- nltk
-- text2emotion
-- emoji==1.6.3
 
 
 ## Installation 
