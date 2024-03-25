@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
+
+import os
 import random
 import time
+from datetime import datetime
 import concurrent.futures
 import asyncio
 import rospy
@@ -13,7 +16,7 @@ from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk.sentiment import SentimentIntensityAnalyzer
 
 from qt_robot_interface.srv import *
-asr = rospy.get_param('/cwm/chatengine/asr', "chatgpt")
+asr = rospy.get_param('/cwm/asr', "riva")
 if asr == "riva":
     try:
         from qt_riva_asr_app.srv import *
@@ -125,8 +128,11 @@ class QTChatBot():
         status = self.speechConfig(self.tts_voice, 120, 80)
 
         # create conversation log file 
-        path="./logs/"
-        self.logfile = open(path+time.strftime("%Y-%m-%d", time.localtime())+"-"+time.strftime("%I-%M", time.localtime())+".txt", 'a')
+        # path="./logs/"
+        # self.logfile = open(path+time.strftime("%Y-%m-%d", time.localtime())+"-"+time.strftime("%I-%M", time.localtime())+".txt", 'a')
+        log_path = rospy.get_param('/cwm/chatlog_path', "~/conversation_with_memory-logs/")
+        os.makedirs(log_path, exist_ok=True)
+        self.logfile = open(f"{log_path}/{datetime.now().strftime('%Y-%m-%dT%H:%M:%S')}.log", "a")
         
     def talk(self, text):
         print('QT talking:', text)

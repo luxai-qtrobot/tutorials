@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(gpt_demo_rag)
+project(conversation_with_memory)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -102,7 +102,7 @@ generate_messages(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES gpt_demo_rag
+#  LIBRARIES conversation_with_memory
 #  CATKIN_DEPENDS roscpp rospy
 #  DEPENDS system_lib
 )
@@ -120,7 +120,7 @@ include_directories(
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/qtgpt_demo_rag.cpp
+#   src/${PROJECT_NAME}/qtconversation_with_memory.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -131,7 +131,7 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/qtgpt_demo_rag_node.cpp)
+# add_executable(${PROJECT_NAME}_node src/qtconversation_with_memory_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -186,7 +186,7 @@ include_directories(
 
 ## Mark other files for installation (e.g. launch and bag files, etc.)
 install(FILES
-  scripts/start_gpt_demo_rag.sh
+  scripts/start_conversation_with_memory.sh
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
   # DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
@@ -196,7 +196,7 @@ install(FILES
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_qtgpt_demo_rag.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_qtconversation_with_memory.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
