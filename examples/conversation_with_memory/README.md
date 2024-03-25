@@ -9,6 +9,8 @@ This example implements parts of the interaction as online and offline options:
 
 You can combine online and offline components as you prefer if you are using QTrobot AI@Edge. Intel-based versions of QTrobot are better suitable for online language generation, but other options are still available. For instance, you can use Vosk for offline speech recognition, encode your knowldge on device using local embeddings and use cloud-based generative models to produce fluent language from the context that you retrieve offline. 
 
+__TOC__
+
 
 ## Installation 
 
@@ -34,7 +36,68 @@ Follow [build and run fastchat-server docker](docker/fastchat-server/README.md) 
 
 
 
-## Configure speech recognition
+## Running converstion_with_memory demo 
+You can configure the conversation_with_memory to utilize various components for language generation, speech recognition, and RAG. Please refer to the sections below to explore different configuration options.
+
+### Running on QTrobot AI@Edge with FastChat Vicuna1.5-13B and Riva ASR (all offline)
+1. Review the settings in the `conversation_with_memory/config/conversation_with_memory.yaml` file, focusing on the following configurations: 
+```yaml
+asr: "riva" 
+# ...
+chatengine:
+   engine: "fastchat"
+# ...   
+  embeddingsmodel:
+    embeddingsengine: "hugging"
+```
+
+2. Start Riva ASR dcoker container and wait untill it loaded. It may takes 1 to 2 minutes. 
+```bash
+cd ~/robot/riva_quickstart_arm64_v2.13.0
+bash ./riva_start.sh ./config.sh -s
+```
+
+3. Run `qt_riva_asr_app` node:
+```bash
+roslaunch qt_riva_asr_app qt_riva_asr_app.launch 
+```
+
+4. Start Fastchat docker container with `vicuna-13b-v1.5` model in another terminal. Wait for 15-30 seconds for the model to be loaded in the docker in background.
+```bash
+docker run -d --net=host -e "MODEL_NAME=models--lmsys--vicuna-13b-v1.5" -v /home/qtrobot/robot/huggingface/models:/data fastchat-server
+```
+
+5. Launch the `conversation_wit_memory` demo: 
+```bash
+roslaunch conversation_with_memory conversation_with_memory.launch
+```
+
+
+### Running on QTrobot RDV2 () with OpenAI ChatGPT and GSpeech (all online)
+1. Review the settings in the `conversation_with_memory/config/conversation_with_memory.yaml` file, focusing on the following configurations: 
+```yaml
+asr: "gspeech" 
+# ...
+chatengine:
+   engine: "chatgpt"
+   OPENAI_KEY: "<your-openai-key>"    
+# ...   
+  embeddingsmodel:
+    embeddingsengine: "openai"
+```
+
+2. Run `qt_gspeech_app` node:
+```bash
+roslaunch qt_gspeech_app qt_gspeech_ap.launch 
+```
+
+3. Launch the `conversation_wit_memory` demo: 
+```bash
+roslaunch conversation_with_memory conversation_with_memory.launch
+```
+
+
+## Speech recognition (ASR)
 
 In the project [config file](config/conversation_with_memory.yaml), you can choose among vosk, riva and gspeech options. Please choose only one, for example `asr: "riva" `.  These are the prerequisites for making ASR work:
 
