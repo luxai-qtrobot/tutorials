@@ -11,7 +11,7 @@ https://developer.download.nvidia.cn/compute/redist/jp/v512/pytorch/torch-2.1.0a
 # NVIDIA tensorfllow
 --extra-index-url https://developer.download.nvidia.com/compute/redist/jp/v512
 numpy==1.22
-future==0.18.2
+future==0.18.3
 mock==3.0.5
 keras_preprocessing==1.1.2
 keras_applications==1.0.8
