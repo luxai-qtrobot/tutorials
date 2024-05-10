@@ -43,7 +43,7 @@ class QTDeepFace:
             rospy.logerr(str(e))
             
         rows, cols, channels = cv_image.shape
-        print(rows, cols)
+        # print(rows, cols)
         faces = []
         fs = []
 
