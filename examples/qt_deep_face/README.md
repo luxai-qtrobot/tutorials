@@ -82,6 +82,13 @@ dp = QTDeepFace(actions=['emotion'])
 ```
 running the code as it is, will published recognized emotions of multiple faces. 
 
+You can also use ROS `image_view` to see the image output with landmarks: 
+```bash
+rosrun image_view image_view image:=/qt_deep_face/image/out
+```
+
+**Note:** IF `image_view` is not installed on QTPC, you can simple install it using `sudo apt install ros-noetic-image-view`. 
+
 
 If you would like to use the code for person recognition, please follow these steps: 
 
