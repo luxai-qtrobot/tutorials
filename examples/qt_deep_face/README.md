@@ -98,7 +98,18 @@ enable the `recognize_persons=True` and set the `persons_db_path` to your person
 dp = QTDeepFace(actions=['emotion'], recognize_persons=True, persons_db_path="/home/qtrobot/persons")
 ``` 
 
+## Other paramters and optimization
+You can set the following paramters in `QTDeepFace` class to optimize the performance. For example, if you need very high precision of face detector, for example to detect faces from far distance, you can set `detector_backend='retinaface'`. However, this also loads more the GPU. 
+using `'ssd'` fort `detector_backend` provide good balance between accuracy and performance.  
 
+Please check [DeepFace](https://pypi.org/project/deepface/) for comparison between, detectors, models! 
 
-
-
+```python
+    actions=['emotion']       # actions : ['age', 'gender', 'race', 'emotion'])
+    recognize_persons=False   # enable person recognition
+    persons_db_path="./"      # database folder for person recognition 
+    frame_rate=5              # processing framerate (use to not overload system)
+    model_name='VGG-Face',    # Face recognition models: "VGG-Face", "Facenet", "Facenet512", "OpenFace", "DeepFace", "DeepID", "ArcFace", "Dlib", "SFace", "GhostFaceNet"
+    detector_backend='ssd'   # Face Detectors: 'opencv', 'ssd', 'dlib', 'mtcnn', 'fastmtcnn', 'retinaface', 'mediapipe', 'yolov8', 'yunet', 'centerface',
+```
+  
