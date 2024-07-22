@@ -54,7 +54,6 @@ class QTChatBot:
             try:
                 rospy.loginfo('Waiting fo speech command...')
                 text, lang = self.asr.recognize_once()
-                print(text, lang)
                 if text:
                     self._asr_callback(text, lang)
             except Exception as e:
