@@ -1,0 +1,4 @@
+rospkg
+pyyaml
+tenacity==8.5.0
+ollama==0.2.1
