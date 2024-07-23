@@ -97,8 +97,11 @@ ollama run llama3
 ```
 you can chat with the model from terminal.
 
-
-
+6. exit to stop the docker
+run the follwoing command in ollama container terminal:
+```bash
+exit
+```
 
 ## Running QTrobot Offline conversation with Riva ASR:
 1. open a termianl and start Riva ASR container. Wait untill it's intialized. It may take 1 to 2 minutes. 
@@ -112,7 +115,7 @@ bash ./riva_start.sh ./config.sh -s
 roslaunch qt_riva_asr_app qt_riva_asr_app.launch 
 ```
 
-3. in another terminal run ollama docker container: 
+3. in another terminal run ollama docker container (IF IT IS NOT ALREADY RUNNING): 
 ```bash
 docker run -it --runtime nvidia --rm --network=host -v /home/qtrobot/robot/ollama:/ollama -v /home/qtrobot/robot/ollama:/data/logs -e OLLAMA_MODELS=ollama dustynv/ollama:r36.2.0
 ```
