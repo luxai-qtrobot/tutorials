@@ -6,25 +6,11 @@
 This project is designed to showcase QTrobot's ability to serve as a private, secure, and highly customizable data assistant. Users can simply upload their documents (e.g., PDFs, Microsoft Word) to QTrobot and start asking questions or requesting information, all through natural voice interaction. The **entire process happens on-device**, ensuring privacy and security for the user's data.
 
 
-<div style="display: flex; justify-content: space-around;">
-  <div style="text-align: center;">
-    <a href="https://storage-h5fvadg9aggzcje6.z03.azurefd.net/luxai-public/video/demos/qt_ai_assitant_multi_lingual.mp4">
-      <img src="images/multi_lingual.png" alt="Multi lingual" width="400px"/>
-    </a>
-  </div>
-  <div style="text-align: center;">
-    <a href="https://storage-h5fvadg9aggzcje6.z03.azurefd.net/luxai-public/video/demos/qt_ai_assitant_multi_users.mp4">
-      <img src="images/multi_users.png" alt="Multi users" width="400px"/>
-    </a>
-    <br/>
-  </div>
-  <div style="text-align: center;">
-    <a href="https://storage-h5fvadg9aggzcje6.z03.azurefd.net/luxai-public/video/demos/qt_ai_assitant_scene_understanding.mp4">
-      <img src="images/scene_understanding.png" alt="Scene understanding" width="400px"/>
-    </a>
-    <br/>
-  </div>
-</div>
+
+| <a href="https://storage-h5fvadg9aggzcje6.z03.azurefd.net/luxai-public/video/demos/qt_ai_assitant_multi_lingual.mp4"><img src="images/multi_lingual.png" alt="Multi lingual" width="400px"/></a> | <a href="https://storage-h5fvadg9aggzcje6.z03.azurefd.net/luxai-public/video/demos/qt_ai_assitant_multi_users.mp4"><img src="images/multi_users.png" alt="Multi users" width="400px"/></a> | <a href="https://storage-h5fvadg9aggzcje6.z03.azurefd.net/luxai-public/video/demos/qt_ai_assitant_scene_understanding.mp4"><img src="images/scene_understanding.png" alt="Scene understanding" width="400px"/></a> |
+|:--:|:--:|:--:|
+| **Multi Lingual** | **Multi Users** | **Scene Understanding** |
+
 
 
 ## Table of Contents
