@@ -1,5 +1,6 @@
 **Demos**
 ---
+* [**QTrobot: Your AI Data Assistant**](qt_ai_data_assistant/) : contains demo of QTrobotAI@Edge as AI Data assitant
 * [**Range of Motion & DOF**](qt_range_of_motion/) : contains motor movement demo
 * [**Far-Field Microphone Array - Voice activity & direction detection**](qt_microphone_detection/) : contains voice detection demo
 * [**Far-Field Microphone Array - Voice interaction**](qt_microphone_interaction/) : contains voice interaction demo

@@ -1,0 +1,32 @@
+wheel
+rospkg
+pyyaml
+tenacity==8.4.2
+termcolor
+opencv-python
+
+# Deepface
+--extra-index-url https://developer.download.nvidia.com/compute/redist/jp/v512
+numpy==1.22
+future==0.18.3
+mock==3.0.5
+keras_preprocessing==1.1.2
+keras_applications==1.0.8
+gast==0.4.0
+pybind11==2.13.1
+pkgconfig==1.5.5
+packaging==24.1
+h5py==3.7.0
+tensorflow==2.12.0+nv23.06
+deepface==0.0.92
+
+# LlamaIndex 
+llama-index-llms-ollama==0.2.2
+llama-index-embeddings-ollama==0.1.3
+llama-index-readers-file==0.1.33
+
+# for docx dcoument loader  
+docx2txt
+
+# Riva ASR
+nvidia-riva-client==2.16.0

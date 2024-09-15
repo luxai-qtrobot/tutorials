@@ -15,6 +15,7 @@ This repository contains a set of code samples and tutorial for programming [QTr
 
 [**Demos**](demos/)
 ---
+* [**QTrobot: Your AI Data Assistant**](demos/qt_ai_data_assistant/) : contains demo of QTrobotAI@Edge as AI Data assitant
 * [**Range of Motion & DOF**](demos/qt_range_of_motion/) : contains motor movement demo
 * [**Far-Field Microphone Array - Voice activity & direction detection**](demos/qt_microphone_detection/) : contains voice detection demo
 * [**Far-Field Microphone Array - Voice interaction**](demos/qt_microphone_interaction/) : contains voice interaction demo
