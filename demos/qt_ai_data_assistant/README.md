@@ -7,9 +7,9 @@ This project is designed to showcase QTrobot's ability to serve as a private, se
 
 
 
-| <a href="https://storage-h5fvadg9aggzcje6.z03.azurefd.net/luxai-public/video/demos/qt_ai_assitant_multi_lingual.mp4"><img src="images/multi_lingual.png" alt="Multi lingual" width="400px"/></a> | <a href="https://storage-h5fvadg9aggzcje6.z03.azurefd.net/luxai-public/video/demos/qt_ai_assitant_multi_users.mp4"><img src="images/multi_users.png" alt="Multi users" width="400px"/></a> | <a href="https://storage-h5fvadg9aggzcje6.z03.azurefd.net/luxai-public/video/demos/qt_ai_assitant_scene_understanding.mp4"><img src="images/scene_understanding.png" alt="Scene understanding" width="400px"/></a> |
+| ![Multi Lingual](images/multi_lingual.jpg)| ![Multi User](images/multi_users.jpg)| ![Scene Understanding](images/scene_understanding.jpg)|
 |:--:|:--:|:--:|
-| **Multi Lingual** | **Multi Users** | **Scene Understanding** |
+| <a href="https://storage-h5fvadg9aggzcje6.z03.azurefd.net/luxai-public/video/demos/qt_ai_assitant_multi_lingual.mp4"> **Watch Multilingual Conversation Video**</a> | <a href="https://storage-h5fvadg9aggzcje6.z03.azurefd.net/luxai-public/video/demos/qt_ai_assitant_multi_users.mp4"> **Watch Multi-User Conversation Video**</a> | <a href="https://storage-h5fvadg9aggzcje6.z03.azurefd.net/luxai-public/video/demos/qt_ai_assitant_scene_understanding.mp4"> **Watch Scene Understanding Conversation Video**</a> |
 
 
 
