@@ -1,5 +1,13 @@
 # QTrobot Offline Conversation
 
+*===========================================================================================*
+**[NOTICE]**
+
+*This demo is outdated and is maintained for learning purposes only* 
+
+*For the latest version, please refer to [QTrobot: Your AI Data Assistant](../../demos/qt_ai_data_assistant).* 
+
+*===========================================================================================*
 
 ## Requirements:
  - *Fastchat Vicuna* with offline llm model (e.g. `models--lmsys--vicuna-13b-v1.5`)
