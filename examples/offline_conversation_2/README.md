@@ -1,5 +1,15 @@
 # QTrobot Offline Conversation 2
 
+*===========================================================================================*
+**[NOTICE]**
+
+*This demo is outdated and is maintained for learning purposes only* 
+
+*For the latest version, please refer to [QTrobot: Your AI Data Assistant](../../demos/qt_ai_data_assistant).* 
+
+*===========================================================================================*
+
+
 This simple example demonstrates how to implement human-level conversational interaction with QTrobot using offline ASR and LLM (llama3). Everything used in this demo runs offline on **QTrobot RD-V2 AI@Edge**.
 
 ## Requirements:
