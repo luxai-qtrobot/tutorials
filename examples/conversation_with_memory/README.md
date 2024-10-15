@@ -1,5 +1,16 @@
 # Embodied conversation with memory
 
+*===========================================================================================*
+**[NOTICE]**
+
+*This demo is outdated and is maintained for learning purposes only* 
+
+*For the latest version, please refer to [QTrobot: Your AI Data Assistant](../../demos/qt_ai_data_assistant).* 
+
+*===========================================================================================*
+
+
+
 This example shows how retrieval-augmented generation (RAG) techniques can be used to provide a social agent with a consistent personality and long-term memory.
 
 This example implements parts of the interaction as online and offline options:
