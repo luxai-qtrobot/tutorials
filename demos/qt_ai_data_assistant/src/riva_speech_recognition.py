@@ -10,6 +10,7 @@ from threading import Event, Thread
 import rospy
 from audio_common_msgs.msg import AudioData
 import riva.client
+import grpc
 
 
 class MicrophoneStream:
@@ -108,6 +109,12 @@ class RivaSpeechRecognition:
         self.asr_event_thread.start()
 
 
+    def _reinitilize_riva_client(self):
+        self.auth = None
+        self.asr_service = None
+        self.auth = riva.client.Auth(self.ssl_cert, self.use_ssl, self.server)
+        self.asr_service = riva.client.ASRService(self.auth)
+
 
     def _callback_audio_stream(self, msg): 
         indata = bytes(msg.data)          
@@ -173,10 +180,20 @@ class RivaSpeechRecognition:
                     if self.detection_timeout > 0 and not transcript:
                         elapsed_time = time.time() - start_time
                         if elapsed_time > self.detection_timeout:
-                            break
+                            break              
             except Exception as e: 
                 if not rospy.is_shutdown():
-                    rospy.logwarn(str(e))
+                    code = None
+                    try: 
+                        code = e.code()
+                    except:
+                        pass
+                    if code == grpc.StatusCode.UNAVAILABLE:
+                        rospy.logerr('Riva server is not available. Checking after 10 second...')
+                        time.sleep(10)
+                        self._reinitilize_riva_client()
+                    else:
+                        rospy.logwarn(str(e))
 
         self._asr_event_callback(RivaSpeechRecognition.Event.STOPPED)        
         return None, None
