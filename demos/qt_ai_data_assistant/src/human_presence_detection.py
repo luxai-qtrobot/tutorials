@@ -53,7 +53,8 @@ class HumanPresenceDetection:
     DEPTH_ASSUMPTION = 1.5
     MICROPHONE_HEIGHT = 0.65
     MIN_HUMAN_FACE_WIDTH = 30 # in pixel: to avoid perople from far distant 
-
+    MAX_KNOWN_FACES = 5
+    
     def __init__(self, kinematic_interface=None, detection_framerate=None, external_vad_trigger=False):
         self.presence_callbacks = []        
         self.face_rate = rospy.Rate(detection_framerate) if detection_framerate else None
@@ -238,13 +239,20 @@ class HumanPresenceDetection:
                         roi = image[y:y+h, x:x+w]
                         embedding = DeepFace.represent(img_path=roi, detector_backend=self.face_detector_backend, model_name="VGG-Face")[0]['embedding']
                         face_id = self.find_face(embedding)                        
-                        if not face_id:
-                            face_id = len(self.deep_known_faces) + 1
+                        if not face_id:                            
+                            if self.deep_known_faces:
+                                face_id = int(next(reversed(self.deep_known_faces))) + 1
+                            else:
+                                face_id = 1
+                            # trim the deep_known_faces to MAX_KNOWN_FACES limit
+                            if len(self.deep_known_faces) > HumanPresenceDetection.MAX_KNOWN_FACES:
+                                first_key = next(iter(self.deep_known_faces))
+                                self.deep_known_faces.pop(first_key)
                             self.deep_known_faces[face_id] = embedding
                             continue
-                    except Exception as e:                        
+                    except Exception as e:                    
                         continue
-                                        
+
                     self.detected_persons[face_id] = {
                         'id': face_id,
                         'face':{                                                  

@@ -10,7 +10,12 @@ from threading import Lock
 from std_msgs.msg import Float64MultiArray
 from sensor_msgs.msg import JointState
 
-# from qt_robot_interface.srv import emotion_look
+
+try:
+    from qt_robot_interface.srv import emotion_look    
+except:
+    pass
+
 from .head_solver import QTrobotHeadSolver
 from .arms_solver import QTrobotArmsSolver
 
@@ -31,12 +36,22 @@ class QTrobotKinematicInterface:
         self.head_solver = QTrobotHeadSolver()
         self.arms_solver = QTrobotArmsSolver()        
     
-        # create a publisher and subscribers and service clients 
-        # self.gaze = rospy.ServiceProxy('/qt_robot/emotion/look', emotion_look)
+        # create a publisher and subscribers and service clients
+                         
         self.head = rospy.Publisher('/qt_robot/head_position/command', Float64MultiArray, queue_size=1)
         self.right_pub = rospy.Publisher('/qt_robot/right_arm_position/command', Float64MultiArray, queue_size=1)
         self.left_pub = rospy.Publisher('/qt_robot/left_arm_position/command', Float64MultiArray, queue_size=1)
         rospy.Subscriber('/qt_robot/joints/state', JointState, self._joint_state_callback)
+
+        # check if the '/qt_robot/emotion/look' service is enabled 
+        self.gaze = None 
+        if emotion_look:
+            try: 
+                rospy.wait_for_service('/qt_robot/emotion/look', 5)
+                self.gaze = rospy.ServiceProxy('/qt_robot/emotion/look', emotion_look)
+            except Exception as e:
+                self.gaze = None
+                rospy.logwarn(f"QTrobotKinematicInterface initialized without 'emotion_look' interface!")
 
 
         # wait for head publisher
@@ -59,7 +74,10 @@ class QTrobotKinematicInterface:
             if rospy.get_time() - wtime_begin > 5.0:
                 raise Exception("Timeout while waiting joint state values!")
             rospy.sleep(0.1)
-                        
+
+
+
+
     def get_head_pos(self):
         self.joints_state_lock.acquire()
         state = self.joints_state
@@ -89,9 +107,11 @@ class QTrobotKinematicInterface:
 
         yaw_diff = int(head_angles[0] - head_yaw)
         pitch_diff = int(head_angles[1] - head_pitch)
-        # xp = np.clip(yaw_diff, -self.GAZE_THRESHOULD_ANGLES[0], self.GAZE_THRESHOULD_ANGLES[0])
-        # yp = np.clip(pitch_diff, -self.GAZE_THRESHOULD_ANGLES[1], self.GAZE_THRESHOULD_ANGLES[1])
-        # self.gaze([xp, yp], [xp, yp], 0)
+        if self.gaze:
+            xp = np.clip(yaw_diff, -self.GAZE_THRESHOULD_ANGLES[0], self.GAZE_THRESHOULD_ANGLES[0])
+            yp = np.clip(pitch_diff, -self.GAZE_THRESHOULD_ANGLES[1], self.GAZE_THRESHOULD_ANGLES[1])
+            self.gaze([xp, yp], [xp, yp], 0)
+
         if only_gaze or (abs(yaw_diff) < self.LOOK_THRESHOULD_ANGLES[0] and abs(pitch_diff) < self.LOOK_THRESHOULD_ANGLES[1]):
             return 
         
