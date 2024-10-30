@@ -67,7 +67,7 @@ class QTAIDataAssistant:
         self.command_interface = CommandInterface(self._function_call_response_callback)
 
         self.vad_enabled = self.command_interface.set_respeaker_param("AGCONOFF", 0)
-        self.vad_enabled = self.vad_enabled and self.command_interface.set_respeaker_param("AGCGAIN", 50)
+        self.vad_enabled = self.vad_enabled and self.command_interface.set_respeaker_param("AGCGAIN", 40)
 
         self.asr = RivaSpeechRecognitionSilero(
             language=language,
