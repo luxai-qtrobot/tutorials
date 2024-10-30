@@ -8,7 +8,7 @@ import sys
 import rospy
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
-from riva_speech_recognition import RivaSpeechRecognition
+from riva_speech_recognition_vad import RivaSpeechRecognitionSilero
 
 
 def asr_evnet_callback(event):
@@ -17,7 +17,9 @@ def asr_evnet_callback(event):
 
 if __name__ == '__main__':
     rospy.init_node('simple_asr_riva')
-    asr = RivaSpeechRecognition(event_callback=asr_evnet_callback )
+    asr = RivaSpeechRecognitionSilero(
+        event_callback=asr_evnet_callback,
+        use_vad=True)
     
     while not rospy.is_shutdown():         
         text, lang = asr.recognize_once()
