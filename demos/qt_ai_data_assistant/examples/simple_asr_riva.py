@@ -14,6 +14,7 @@ from riva_speech_recognition_vad import RivaSpeechRecognitionSilero
 def asr_evnet_callback(event):
     print(event)
     
+    
 
 if __name__ == '__main__':
     rospy.init_node('simple_asr_riva')

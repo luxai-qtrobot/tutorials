@@ -22,7 +22,7 @@ from human_presence_detection import HumanPresenceDetection
 from human_tracking import HumanTracking
 from idle_attention import IdleAttention
 
-from riva_speech_recognition import RivaSpeechRecognition
+from riva_speech_recognition_vad import RivaSpeechRecognitionSilero
 from scene_detection import SceneDetection
 
 def pretty_print(item):
@@ -65,8 +65,13 @@ class QTAIDataAssistant:
         self.active_speaker = None
         self.last_interaction_time = rospy.get_time()
         self.command_interface = CommandInterface(self._function_call_response_callback)
-        self.asr = RivaSpeechRecognition(
+
+        self.vad_enabled = self.command_interface.set_respeaker_param("AGCONOFF", 0)
+        self.vad_enabled = self.vad_enabled and self.command_interface.set_respeaker_param("AGCGAIN", 50)
+
+        self.asr = RivaSpeechRecognitionSilero(
             language=language,
+            use_vad=self.vad_enabled,
             event_callback=self.asr_event_callback
             )
         self.human_detector = HumanPresenceDetection(detection_framerate=5, external_vad_trigger=True)
@@ -140,7 +145,7 @@ class QTAIDataAssistant:
             ret = self.command_interface.set_languge(language, 0, 100)
             rospy.loginfo(f"Setting TTS languge to '{language}': {ret}")
             self.asr.stop()
-            self.asr = RivaSpeechRecognition(language=language, event_callback=self.asr_event_callback)
+            self.asr = RivaSpeechRecognitionSilero(language=language, use_vad=self.vad_enabled, event_callback=self.asr_event_callback)
             rospy.loginfo(f"Riva ASR set to '{language}'")
             confirmation = {"en-US": "Sure!", "en-GB": "Sure!", "ar-AR": "بالتأكيد!", "de-DE": "Sicher!", "es-ES": "¡Claro!", "fr-FR": "Bien sûr!", "hi-IN": "ज़रूर!", "it-IT": "Certo!", "ja-JP": "もちろん!", "ru-RU": "Конечно!", "ko-KR": "물론이야!", "pt-BR": "Claro!", "zh-CN": "当然!"}
             self.command_interface.execute([{"command": "talk", "message": confirmation.get(language, "")}])
@@ -201,7 +206,7 @@ class QTAIDataAssistant:
 
     def asr_event_callback(self, event):
         
-        if event == RivaSpeechRecognition.Event.RECOGNIZING:            
+        if event == RivaSpeechRecognitionSilero.Event.RECOGNIZING:            
             self.human_detector.on_vad_trigged()
             if self._get_state() != QTAIDataAssistant.InteractionState.LISTENING:
                 self._set_state(QTAIDataAssistant.InteractionState.LISTENING)

@@ -17,6 +17,12 @@ from datetime import datetime
 
 from kinematics.kinematic_interface import QTrobotKinematicInterface
 
+try:
+    from qt_respeaker_app.srv import tuning_set, tuning_get
+except:
+    pass
+
+
 class CommandInterface(object):
     """command interface"""
 
@@ -166,3 +172,14 @@ class CommandInterface(object):
         
     def show_emotion(self, emotion: str):
         status = self.emotionShow(emotion)
+
+    def set_respeaker_param(self, param, value): 
+        if not tuning_set:
+            rospy.logwarn(f"set_respeaker_param: tunning_set interface is not available!")
+            return False
+        param_setter = rospy.ServiceProxy('/qt_respeaker_app/tuning/set', tuning_set)
+        try:
+            return param_setter(param, value)            
+        except:
+            rospy.logwarn(f"set_respeaker_param: could not set param {param} to {value}.")
+        return False

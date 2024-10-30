@@ -7,6 +7,7 @@ import time
 from enum import Enum
 import queue
 from threading import Event, Thread
+import wave
 import rospy
 from audio_common_msgs.msg import AudioData
 import riva.client
@@ -66,15 +67,35 @@ class SileroVAD():
 class MicrophoneStream:
     """Opens a recording stream as responses yielding the audio chunks."""
 
-    def __init__(self, rate=16000, num_samples=512, vad: SileroVAD = None) -> None:
+    def __init__(self, 
+                 rate=16000,
+                 num_samples=512,
+                 channels=1,
+                 vad: SileroVAD = None,
+                 audio_record_file=None) -> None:
         self.vad = vad
         self.rate = rate
+        self.channels = channels
         self.num_samples = num_samples
+
+        # check if we need to record audio
+        if audio_record_file: 
+            self.wf = wave.open(audio_record_file, 'wb')
+            self.wf.setnchannels(channels)
+            self.wf.setsampwidth(2)
+            self.wf.setframerate(rate)
+        else: 
+            self.wf = None
 
         self.stream_buff = queue.Queue(maxsize=math.ceil(60 / (num_samples/rate))) # more than one minute
         self.closed = True
-
         self.voice_event = Event()  # Event to signal voice detection  
+
+        if not self.vad:
+            rospy.logwarn(f"MicrophoneStream is initialized without VAD!")
+
+        if self.wf:
+            rospy.loginfo(f"MicrophoneStream is recording the speech audio in {audio_record_file}")
 
     def __enter__(self):
         self.closed = False
@@ -85,6 +106,8 @@ class MicrophoneStream:
         self.closed = True
         self.stream_buff.put(None)
         self.voice_event.set()
+        if self.wf:
+            self.wf.close()
 
 
     def __next__(self) -> bytes:
@@ -131,6 +154,10 @@ class MicrophoneStream:
             # add the chunk to queue
             self.stream_buff.put_nowait(chunk)
 
+            # record audio chuncks if is enabled 
+            if self.wf:
+                self.wf.writeframes(chunk)
+
             if not self.vad:                
                 self.voice_event.set()
                 return 
@@ -138,8 +165,8 @@ class MicrophoneStream:
             # voice activity is starting 
             if self.vad.is_voice(chunk):
                 if not self.voice_event.is_set():                    
-                    # keep last 0.5 second and delete the rest
-                    self.reset(seconds_to_keep=0.5)
+                    # keep last one second and delete the rest
+                    self.reset(seconds_to_keep=1.0)
                 self.voice_event.set()
         except:
             pass
@@ -207,7 +234,7 @@ class RivaSpeechRecognitionSilero:
         riva.client.add_word_boosting_to_config(self.config, self.boosted_lm_words, self.boosted_lm_score)
         riva.client.add_speaker_diarization_to_config(self.config, diarization_enable=self.speaker_diarization)        
         # start recognize service
-        rospy.Subscriber('/qt_respeaker_app/channel0', AudioData, self._callback_audio_stream)
+        rospy.Subscriber('/qt_respeaker_app/channel0', AudioData, self._callback_audio_stream, queue_size=10)
 
         self.asr_event_queue = queue.Queue(maxsize=1)
         self.asr_event_thread = Thread(target=self._proccess_asr_events, daemon=True)        
@@ -263,7 +290,7 @@ class RivaSpeechRecognitionSilero:
             rospy.logdebug('waiing for voice activity...')
             if not self.microphone_stream.wait_for_voice(timeout=5.0):
                 return None, None            
-            # rospy.logdebug('wait_for_voice detected!')
+            rospy.logdebug('wait_for_voice detected!')
                 
         if rospy.is_shutdown():
             return None, None 
