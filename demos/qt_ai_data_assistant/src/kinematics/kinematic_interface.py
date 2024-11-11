@@ -14,7 +14,7 @@ from sensor_msgs.msg import JointState
 try:
     from qt_robot_interface.srv import emotion_look    
 except:
-    pass
+    emotion_look = None    
 
 from .head_solver import QTrobotHeadSolver
 from .arms_solver import QTrobotArmsSolver
