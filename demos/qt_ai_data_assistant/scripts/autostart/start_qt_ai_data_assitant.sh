@@ -21,7 +21,7 @@ export LD_PRELOAD=/usr/lib/aarch64-linux-gnu/libgomp.so.1
 
 cd ~/robot/code/tutorials/demos/qt_ai_data_assistant/
 source venv/bin/activate
-python src/qt_ai_data_assistant.py --enable-scene
+python src/qt_ai_data_assistant.py
 
 } &>> ${LOG_FILE}
 
