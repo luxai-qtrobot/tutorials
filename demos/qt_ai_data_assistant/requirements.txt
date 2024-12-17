@@ -21,6 +21,7 @@ tensorflow==2.12.0+nv23.06
 deepface==0.0.92
 
 # LlamaIndex 
+ollama==0.3.3
 llama-index-llms-ollama==0.2.2
 llama-index-embeddings-ollama==0.1.3
 llama-index-readers-file==0.1.33
