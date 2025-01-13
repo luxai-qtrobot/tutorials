@@ -25,12 +25,14 @@ from idle_attention import IdleAttention
 from riva_speech_recognition_vad import RivaSpeechRecognitionSilero
 from scene_detection import SceneDetection
 
+from paramify.paramify_web import ParamifyWeb
+
 def pretty_print(item):
     print(json.dumps(item, indent=2))
 
 
 
-class QTAIDataAssistant:
+class QTAIDataAssistant(ParamifyWeb):
     IDLE_INTERACTION_TIMEOUT = 1 * 60 # seconds
 
     class InteractionState(Enum):
@@ -40,24 +42,18 @@ class QTAIDataAssistant:
         RESPONDING = 4
         PAUSED = 5    
 
-    def __init__(self, 
-                 model='llama3.1', 
-                 document_path="~/Documents", 
-                 document_formats=['.pdf'],
-                 max_num_documents=5,
-                 language='en-US',
-                 mem_store_file=None,
-                 scene_procesing=False,
-                 disable_rag=False):
-        self.chat = ChatWithRAG(model=model,
+    def __init__(self, config):
+        super().__init__(config, port=5001)
+
+        self.chat = ChatWithRAG(model=self.parameters.llm,
                                 system_role=ConversationPrompt['system_role'],
-                                document_path=document_path,
-                                max_num_documents=max_num_documents,
-                                document_formats=document_formats,
-                                scene_procesing=scene_procesing,
-                                disable_rag=disable_rag,
-                                mem_store_file=mem_store_file)
-        self.language = language        
+                                document_path=self.parameters.docs,
+                                max_num_documents=self.parameters.max_docs,
+                                document_formats=self.parameters.formats,
+                                scene_procesing=self.parameters.enable_scene,
+                                disable_rag=self.parameters.disable_rag,
+                                mem_store_file=self.parameters.mem_store)
+        self.language = self.parameters.lang
         self.state = None
         self.state_lock = Lock()
         self.finish = False
@@ -70,7 +66,7 @@ class QTAIDataAssistant:
         self.vad_enabled = self.vad_enabled and self.command_interface.set_respeaker_param("AGCGAIN", 40)
 
         self.asr = RivaSpeechRecognitionSilero(
-            language=language,
+            language=self.language,
             use_vad=self.vad_enabled,
             event_callback=self.asr_event_callback
             )
@@ -79,7 +75,7 @@ class QTAIDataAssistant:
         self.human_tracker = HumanTracking(human_detector=self.human_detector)
         self.idle_attention = IdleAttention(attention_time=5, human_tracker=self.human_tracker)
         
-        self.scene_detector = SceneDetection(contineous_detection=True, detection_framerate=0.1) if scene_procesing else None
+        self.scene_detector = SceneDetection(contineous_detection=True, detection_framerate=0.1) if self.parameters.enable_scene else None
         if self.scene_detector:
             self.scene_detector.register_callback(self._scene_derection_callback)
 
@@ -89,19 +85,12 @@ class QTAIDataAssistant:
         self.robot_attention_pos =  None # self.command_interface.ikin.get_head_pos()      
 
         # set the tts language/voice (for acapela)  
-        ret = self.command_interface.set_languge(language, 0, 100)
-        rospy.loginfo(f"Setting TTS languge to '{language}': {ret}")
-        print(colored(
-            f"QTAIDataAssistant initialized with:\n"
-            f"llm model:        {model}\n"
-            f"language:         {language}\n"
-            f"documents path:   {document_path}\n"
-            f"document formats: {document_formats}\n"
-            f"max num. of docs: {max_num_documents}\n"
-            f"scene procesing:  {scene_procesing}\n"
-            f"using RAG:        {not disable_rag}\n",
-            'green'))
+        ret = self.command_interface.set_languge(self.language, 0, 100)
+        rospy.loginfo(f"Setting TTS languge to '{self.language}': {ret}")
 
+        print("")
+        print(colored(self, 'green'))
+        print("")
 
 
     def _function_call_response_callback(self, function, result):
@@ -135,7 +124,7 @@ class QTAIDataAssistant:
             
         elif f_name == 'resume_interaction':
             rospy.loginfo(f"responding to {f_name} for {user}")
-            self.paused = True
+            self.paused = False
 
         elif f_name == 'set_language':
             # TODO: check if tts is set correctly by checking the 'ret'
@@ -291,70 +280,27 @@ class QTAIDataAssistant:
         self.stop()                
 
 
+    def on_enable_scene_set(self, value):
+        rospy.loginfo(f"enable_scene was updated to {value}")
+
+    def on_disable_rag_set(self, value):
+        rospy.loginfo(f"disable_rag was updated to {value}")
+
+    def on_lang_set(self, value):
+        rospy.loginfo(f"lang was updated to {value}")
+
+
 # main 
 if __name__ == '__main__':
 
-    parser = argparse.ArgumentParser(
-        description="",
-        epilog="example: qt_ai_data_assitant.py -d ~/my-docuemnts --formats .pdf .docx --max-docs 3 --lang en-US")
-    
     current_dir = os.path.dirname(os.path.abspath(__file__))   
-    default_documents_dir = os.path.abspath(os.path.join(current_dir, '..', 'documents'))
-    parser.add_argument("-d", "--docs", 
-                        help="Path to the folder containg documents to load",
-                        default=default_documents_dir,
-                        type=str)
     
-    parser.add_argument("--formats",
-                        help="document formats ('.txt' '.pdf', '.docx', '.md').",
-                        nargs='+',
-                        default=[".pdf"],
-                        type=str)
-    
-    parser.add_argument("--max-docs",
-                        help="maximum number of docuemnt files load",
-                        default=5,
-                        type=int)
-
-
-    parser.add_argument("--lang",
-                        help="Conversation language (ar-AR, en-US, en-GB, de-DE, es-ES, es-US, fr-FR, hi-IN, it-IT, ja-JP, ru-RU, ko-KR, pt-BR, zh-CN)",
-                        default="en-US",
-                        type=str)
-
-    parser.add_argument("--llm",
-                        help="LLM model to use. default is llama3.1.",
-                        default="llama3.1",
-                        type=str)
-
-    parser.add_argument("--mem-store",
-                        help="path to a json file (e.g. ./chat_store.json) to store the and restore the conversation memeory",
-                        default=None,
-                        type=str)
-
-    parser.add_argument("--enable-scene", 
-                        help="Enables camera feed scene processing",
-                        action="store_true")
-
-    parser.add_argument("--disable-rag", 
-                        help="Disable Retrieval-Augmented Generation",
-                        action="store_true")
-
-    args = parser.parse_args()
-        
     rospy.init_node('qt_ai_data_assistant')
     rospy.loginfo("starting...")
-    demo = QTAIDataAssistant(
-        document_path=args.docs,
-        language=args.lang,
-        document_formats=args.formats,
-        max_num_documents=args.max_docs,
-        model=args.llm,
-        mem_store_file=args.mem_store,
-        scene_procesing=args.enable_scene,
-        disable_rag=args.disable_rag)
+
+    demo = QTAIDataAssistant(f"{current_dir}/config.yaml")
 
     rospy.loginfo("qt_ai_data_assistants started")
     demo.start()    
     rospy.loginfo("qt_ai_data_assistant shutting down") 
-    
+

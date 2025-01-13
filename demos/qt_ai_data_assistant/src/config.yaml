@@ -1,0 +1,67 @@
+name: "QT AI Data Assistant"
+description: "Configuration for the QT AI Data Assistant application"
+parameters:
+  - name: "docs"
+    type: "str"
+    default: "/home/qtrobot/robot/code/tutorials/demos/qt_ai_data_assistant/documents"
+    description: "Path to the folder containing documents to load."
+    scope: "cli"
+
+  - name: "formats"
+    type: "list"
+    default:
+      - ".pdf"
+    description: "Document formats ('.txt', '.pdf', '.docx', '.md')."
+    scope: "cli"
+
+  - name: "max_docs"
+    type: "int"
+    default: 5
+    description: "Maximum number of document files to load."
+    scope: "cli"
+
+  - name: "lang"  
+    type: "str"
+    label: "Converantion language"
+    default: "en-US"
+    description: "Conversation language (ar-AR, en-US, en-GB, de-DE, es-ES, es-US, fr-FR, hi-IN, it-IT, ja-JP, ru-RU, ko-KR, pt-BR, zh-CN)."
+    scope: "all"
+    ui:
+      element: "select"
+      items:
+        - "en-US"
+        - "fr-FR"
+        - "it-IT"    
+
+  - name: "llm"
+    type: "str"
+    default: "llama3.1"
+    description: "LLM model to use. Default is llama3.1."
+    scope: "cli"
+
+  - name: "mem_store"
+    type: "str"
+    # default: null
+    description: "Path to a JSON file (e.g., ./chat_store.json) to store and restore the conversation memory."
+    scope: "cli"
+
+  - name: "enable_scene"  
+    type: "bool"
+    label: "Enable Scene undrestanding"
+    default: false
+    description: "Enables camera feed scene processing."
+    scope: "all"
+
+  - name: "disable_rag"
+    type: "bool"
+    label: "Disable RAG"
+    default: false
+    description: "Disable Retrieval-Augmented Generation."
+    scope: "all"
+
+  - name: "paused"
+    type: "bool"
+    label: "Interaction Paused"
+    default: false
+    description: "Pause and Resume the interaction"
+    scope: "all"
