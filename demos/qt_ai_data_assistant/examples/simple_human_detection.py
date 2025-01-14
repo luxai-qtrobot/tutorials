@@ -25,6 +25,11 @@ def on_presence(data):
 
 if __name__ == '__main__':    
     rospy.init_node('simple_human_detection')    
-    detector = HumanPresenceDetection(detection_framerate=10)
+    detector = HumanPresenceDetection(
+        paused=True,
+        setup_kwargs={
+            'detection_framerate': 10
+            })
     detector.register_callback(on_presence)    
     rospy.spin()
+    detector.terminate()

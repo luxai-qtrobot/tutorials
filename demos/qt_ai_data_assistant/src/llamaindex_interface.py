@@ -24,7 +24,7 @@ from tenacity import retry, wait_random_exponential, stop_after_attempt
 from termcolor import colored
 
 
-from utils import split_into_sentences
+from utils.utils import split_into_sentences
 
 def pretty_print(item):
     print(json.dumps(item, indent=2))
@@ -87,7 +87,7 @@ class ChatWithRAG:
         self.scene_procesing = scene_procesing
         self.mem_store_file = mem_store_file
 
-        Settings.llm = Ollama(model=model, request_timeout=300.0)
+        Settings.llm = Ollama(model=model, request_timeout=300.0)        
         self.llm = Settings.llm
 
         self.chat_store = None

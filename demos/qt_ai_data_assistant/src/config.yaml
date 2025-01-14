@@ -45,13 +45,6 @@ parameters:
     description: "Path to a JSON file (e.g., ./chat_store.json) to store and restore the conversation memory."
     scope: "cli"
 
-  - name: "enable_scene"  
-    type: "bool"
-    label: "Enable Scene undrestanding"
-    default: false
-    description: "Enables camera feed scene processing."
-    scope: "all"
-
   - name: "disable_rag"
     type: "bool"
     label: "Disable RAG"
@@ -59,9 +52,43 @@ parameters:
     description: "Disable Retrieval-Augmented Generation."
     scope: "all"
 
+  - name: "enable_scene"  
+    type: "bool"
+    label: "Enable scene undrestanding"
+    default: false
+    description: "Enables camera feed scene processing."
+    scope: "all"
+
   - name: "paused"
     type: "bool"
-    label: "Interaction Paused"
+    label: "Pause interaction"
     default: false
     description: "Pause and Resume the interaction"
     scope: "all"
+
+  - name: "hold_on"
+    type: "bool"
+    label: "Hold on"
+    default: false
+    description: "Stay silent until you have been asked to talk"
+    scope: "runtime"
+
+  - name: "volume"
+    type: "int"
+    label: "Speaker volume"
+    description: "Robot's speaker volume level."
+    default: 40
+    ui:
+      element: "slider"
+      min: 0
+      max: 100
+    scope: "all"
+    
+  - name: "role"
+    type: "str"
+    label: "Robot role"
+    description: "This is the LLM system prompt which define the robot's role"
+    default: ""
+    ui:
+      element: "textarea"
+    scope: "runtime"

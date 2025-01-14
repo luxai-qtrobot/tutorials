@@ -3,6 +3,7 @@
 # This software is released under the MIT License.
 # https://opensource.org/licenses/MIT
 
+import math
 import queue
 import rospy
 from concurrent.futures import ThreadPoolExecutor, wait
@@ -38,7 +39,7 @@ class CommandInterface(object):
             "resume_interaction": self._cmd_resume_interaction,
             "forget_conversation": self._cmd_forget_conversation,       
             "get_datetime": self._cmd_get_datetime,
-            "set_language": self._cmd_set_language,
+            "set_language": self._cmd_set_language,            
             # "get_image": self._cmd_get_image,
         }        
 
@@ -50,6 +51,7 @@ class CommandInterface(object):
         self.talkText = rospy.ServiceProxy('/qt_robot/behavior/talkText', behavior_talk_text)
         self.speechConfig = rospy.ServiceProxy('/qt_robot/speech/config', speech_config)
         self.emotionShow = rospy.ServiceProxy('/qt_robot/emotion/show', emotion_show)
+        self.settingVolume = rospy.ServiceProxy('/qt_robot/setting/setVolume', setting_setVolume)
         # self.image_sub = rospy.Subscriber("/camera/color/image_raw", Image, self._image_callback)
         self.lqueue = queue.LifoQueue(maxsize=1)
         self.ikin.home(['head', 'right_arm', 'left_arm'], True)
@@ -169,7 +171,12 @@ class CommandInterface(object):
     def set_languge(self, lang_code, pitch=100, speed=100):        
         status = self.speechConfig(lang_code, pitch, speed)
         return status
-        
+
+   # set volume
+    def set_volume(self, level:int = 50):           
+        status = self.settingVolume(int(24*math.log(level)-10))
+        return status
+
     def show_emotion(self, emotion: str):
         status = self.emotionShow(emotion)
 

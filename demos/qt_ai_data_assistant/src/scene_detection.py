@@ -5,19 +5,20 @@
 
 import io
 from queue import Queue
-from threading import Lock, Thread
+from threading import Lock
 import cv2
 import rospy
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 from ollama import chat
 
-class SceneDetection:    
-    def __init__(self,      
-                 model="moondream",
-                 prompt="Describe in details what you see. if you see people, also describe how they dressed and what they carry.",
-                 detection_framerate=1, 
-                 contineous_detection=False):
+from utils.base_node import BaseNode
+
+class SceneDetection(BaseNode):    
+    def setup(self,      
+              model="moondream",
+              prompt="Describe in details what you see. if you see people, also describe how they dressed and what they carry.",
+              detection_framerate=1):
         
         self.model = model
         self.prompt = prompt
@@ -29,11 +30,6 @@ class SceneDetection:
 
         # use queue for syncing
         self.image_queue = Queue(maxsize=1)
-
-        if contineous_detection:
-            # Start the processing thread
-            self.processing_thread = Thread(target=self.process, daemon=True)        
-            self.processing_thread.start()
 
         # create all subscribers
         self.image_sub = rospy.Subscriber("/camera/color/image_raw", Image, self._image_callback)
@@ -82,6 +78,8 @@ class SceneDetection:
 
 
     def _image_callback(self, data):        
+        if self.paused():
+            return
         try:
             bridge = CvBridge()
             image = bridge.imgmsg_to_cv2(data, "bgr8")
@@ -114,21 +112,6 @@ class SceneDetection:
         return desc
 
 
-    def process(self):
-        while not rospy.is_shutdown():            
-            if not self.image_queue.empty():
-                image = self.image_queue.get()                             
-                caption = self._query_moondream(image, self.prompt)
-                if caption:
-                    self.scene_description_lock.acquire()
-                    self.scene_description = caption
-                    self.scene_description_lock.release()
-                    for callback in self.detection_callbacks:
-                        callback(caption)                 
-            # self.rate.sleep()
-            rospy.sleep(1.0/self.detection_framerate)
-
-
     def query(self, prompt: str) -> str:
         try:
             image = self.image_queue.get(timeout=3)
@@ -147,4 +130,20 @@ class SceneDetection:
         response = chat(model=self.model, messages=messages)
         return response['message']['content']
 
+
+    def process(self):
+        if not self.image_queue.empty():
+            image = self.image_queue.get()                             
+            caption = self._query_moondream(image, self.prompt)
+            if caption and not self.paused():
+                self.scene_description_lock.acquire()
+                self.scene_description = caption
+                self.scene_description_lock.release()
+                for callback in self.detection_callbacks:
+                    callback(caption)                 
+        # self.rate.sleep()
+        rospy.sleep(1.0/self.detection_framerate)
+
+    def cleanup(self):    
+        rospy.loginfo(f"{self.name} is terminating...")
 
