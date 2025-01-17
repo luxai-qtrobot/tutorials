@@ -43,7 +43,7 @@ class QTAIDataAssistant(ParamifyWeb, BaseNode):
 
     def __init__(self, 
                  config=None,
-                 port: int = 5000):        
+                 port: int = 6060):        
 
         # Initialize ParamifyWeb
         ParamifyWeb.__init__(self, config=config, port=port)
