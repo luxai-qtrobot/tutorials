@@ -368,12 +368,12 @@ class QTAIDataAssistant(ParamifyWeb, BaseNode):
 # main 
 if __name__ == '__main__':
 
-    current_dir = os.path.dirname(os.path.abspath(__file__))   
     
     rospy.init_node('qt_ai_data_assistant')
     rospy.loginfo("starting...")
 
-    demo = QTAIDataAssistant(config=f"{current_dir}/config.yaml")
+    current_dir = os.path.dirname(os.path.abspath(__file__))   
+    demo = QTAIDataAssistant(config=os.path.join(os.path.dirname(current_dir), "config", "default.yaml"))
 
     rospy.loginfo(f"qt_ai_data_assistants started (Paused: {demo.parameters.paused})")
     rospy.spin() 
