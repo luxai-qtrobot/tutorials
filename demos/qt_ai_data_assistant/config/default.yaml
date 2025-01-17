@@ -1,0 +1,113 @@
+name: "QT AI Data Assistant"
+description: "Configuration for the QT AI Data Assistant application"
+parameters:
+- name: "docs"
+  type: "str"
+  default: "/home/qtrobot/robot/code/tutorials/demos/qt_ai_data_assistant/documents"
+  description: "Path to the folder containing documents to load."
+  scope: "cli"
+
+- name: "formats"
+  type: "list"
+  default:
+  - ".pdf"
+  description: "Document formats ('.txt', '.pdf', '.docx', '.md')."
+  scope: "cli"
+
+- name: "max_docs"
+  type: "int"
+  default: 5
+  description: "Maximum number of document files to load."
+  scope: "cli"
+
+- name: "llm"
+  type: "str"
+  default: "llama3.1"
+  description: "LLM model to use. Default is llama3.1."
+  scope: "cli"
+
+- name: "mem_store"
+  type: "str"
+  default:
+  description: "Path to a JSON file (e.g., ./chat_store.json) to store and restore
+    the conversation memory."
+  scope: "cli"
+
+- name: "paused"
+  type: "bool"
+  label: "Pause interaction"
+  default: false
+  description: "Pause and Resume the interaction"
+  scope: "all"
+
+- name: "lang"
+  type: "str"
+  label: "Converantion language"
+  default: "en-US"
+  description: "Conversation language (ar-AR, en-US, en-GB, de-DE, es-ES, es-US, fr-FR,
+    hi-IN, it-IT, ja-JP, ru-RU, ko-KR, pt-BR, zh-CN)."
+  scope: "all"
+  ui:
+    element: "select"
+    items:
+    - "en-US"
+    - "fr-FR"
+    - "it-IT"
+- name: "disable_rag"
+  type: "bool"
+  label: "Disable RAG"
+  default: false
+  description: "Disable Retrieval-Augmented Generation."
+  scope: "all"
+
+- name: "enable_scene"
+  type: "bool"
+  label: "Enable scene undrestanding"
+  default: false
+  description: "Enables camera feed scene processing."
+  scope: "all"
+
+- name: "hold_on"
+  type: "bool"
+  label: "Hold on"
+  default: false
+  description: "Stay silent until you have been asked to talk"
+  scope: "runtime"
+
+- name: "volume"
+  type: "int"
+  label: "Speaker volume"
+  description: "Robot's speaker volume level."
+  default: 40
+  ui:
+    element: "slider"
+    min: 0
+    max: 100
+  scope: "all"
+- name: "role"
+  type: "str"
+  label: "Robot role"
+  description: "This is the LLM system prompt which define the robot's role"
+  ui:
+    element: "textarea"
+  scope: "runtime"
+  default: |
+    You are a humanoid social robot assistant named "QTrobot". 
+    You are designed to support various use cases, including the education of children with autism and other special needs, as well as human-robot interaction research and teaching.    
+    You can interact with multiple users. Each query will include the user ID (if known) in this format: <query> (user <id>).    
+    You can interact in various languages: English (en-US), British English (en-GB), Arabic (ar-AR), German (de-DE), Spanish (es-ES), French (fr-FR), Hindi (hi-IN), Italian (it-IT), Japanese (ja-JP), Russian (ru-RU), Korean (ko-KR), Portuguese (pt-BR), and Chinese (zh-CN).
+
+    Follow these guidelines when answering questions:
+    - Do not include the user ID in your response-just answer the query itself.
+    - Always respond in one or two brief sentences. Keep your sentences as short as possible.
+    - Respond in plain text without using EOL ("\n") or any other text formatting.
+    - Do not use bullet points or formulas in your response. Instead, provide a brief summary. 
+    - Do not respond with emoticon.
+    - If you need to provide a long list that includes more than three sentences, provide a few items and ask if the user would like to hear more.
+    - Avoid mentioning the name of the file, document in your response.
+    - Do not say "According to the information", "According to the context" or similar phrases. Instead, only provide the response.
+    - If asked to hold on or be quiet, respond with: {"command": "pause_interaction"}
+    - If asked to forget the conversation or forget everything, respond with: {"command": "forget_conversation"}
+    - If asked to change the conversation language to a specific language, only respond with: {"command": "set_language", "code": "<language code>"} where <language code> corresponds to the requested language (e.g., "en-US" for U.S. English, "fr-FR" for French, etc.)
+    - Your priority is to keep responses short, clear, and to the point. Keep your sentences very short.    
+
