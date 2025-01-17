@@ -53,7 +53,7 @@ class QTAIDataAssistant(ParamifyWeb, BaseNode):
 
     def setup(self):
         # set the default system prompt if it is not set via parameters
-        if not self.parameters.role.strip():
+        if not self.parameters.role or not self.parameters.role.strip():
             self.set_role(ConversationPrompt['system_role'])
 
         # initialize chat engine
@@ -73,10 +73,12 @@ class QTAIDataAssistant(ParamifyWeb, BaseNode):
         self.vad_enabled = self.vad_enabled and self.command_interface.set_respeaker_param("AGCGAIN", 40)
 
         self.asr = RivaSpeechRecognitionSilero(
-            language=self.language,
-            use_vad=self.vad_enabled,
-            event_callback=self.asr_event_callback
-            )
+            setup_kwargs={
+                'language': self.language,
+                'use_vad': self.vad_enabled,
+                'event_callback': self.asr_event_callback
+                },
+            paused=self.parameters.paused)
         
         self.human_detector = HumanPresenceDetection(
             setup_kwargs={
@@ -87,7 +89,8 @@ class QTAIDataAssistant(ParamifyWeb, BaseNode):
             
         self.human_detector.register_callback(self._human_presence_callback)
         self.human_tracker = HumanTracking(human_detector=self.human_detector)
-        self.idle_attention = IdleAttention(attention_time=5, human_tracker=self.human_tracker)
+        
+        self.idle_attention = IdleAttention(setup_kwargs={'attention_time':5, 'human_tracker':self.human_tracker}, paused=self.parameters.paused)
         
         self.scene_detector = SceneDetection(setup_kwargs={'detection_framerate': 0.1}, paused=(self.parameters.paused or not self.parameters.enable_scene))
         self.scene_detector.register_callback(self._scene_derection_callback)
@@ -171,8 +174,15 @@ class QTAIDataAssistant(ParamifyWeb, BaseNode):
     def _set_language(self, language:str):
             ret = self.command_interface.set_languge(language, 0, 100)
             rospy.loginfo(f"Setting TTS languge to '{language}': {ret}")
-            self.asr.stop()
-            self.asr = RivaSpeechRecognitionSilero(language=language, use_vad=self.vad_enabled, event_callback=self.asr_event_callback)
+            self.asr.terminate()            
+            self.asr = RivaSpeechRecognitionSilero(
+                setup_kwargs={
+                    'language': self.language,
+                    'use_vad': self.vad_enabled,
+                    'event_callback': self.asr_event_callback
+                    },
+                paused=self.parameters.paused)
+            
             rospy.loginfo(f"Riva ASR set to '{language}'")
             confirmation = {"en-US": "Sure!", "en-GB": "Sure!", "ar-AR": "بالتأكيد!", "de-DE": "Sicher!", "es-ES": "¡Claro!", "fr-FR": "Bien sûr!", "hi-IN": "ज़रूर!", "it-IT": "Certo!", "ja-JP": "もちろん!", "ru-RU": "Конечно!", "ko-KR": "물론이야!", "pt-BR": "Claro!", "zh-CN": "当然!"}
             self.command_interface.execute([{"command": "talk", "message": confirmation.get(language, "")}])
@@ -290,9 +300,10 @@ class QTAIDataAssistant(ParamifyWeb, BaseNode):
     
     def cleanup(self):
         rospy.loginfo("qt_ai_data_assistant shutting down...") 
-        self.asr.stop()
+        self.asr.terminate()
         self.human_detector.terminate()
         self.scene_detector.terminate() if self.scene_detector else None
+        self.idle_attention.terminate()
         self.chat.close()
         
 
@@ -335,12 +346,16 @@ class QTAIDataAssistant(ParamifyWeb, BaseNode):
     def on_paused_set(self, value):        
         rospy.loginfo(f"paused param set to {value}")
         if value:
+            self.asr.pause()
             self.human_detector.pause()
             self.scene_detector.pause()
+            self.idle_attention.pause()
             self.pause()
         else: 
+            self.asr.resume()
             self.human_detector.resume()
             self.scene_detector.resume() if self.parameters.enable_scene else None
+            self.idle_attention.resume()
             self.resume()        
 
     def on_volume_set(self, value):           
