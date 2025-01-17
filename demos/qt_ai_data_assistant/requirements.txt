@@ -5,6 +5,9 @@ tenacity==8.4.2
 termcolor
 opencv-python
 
+# Paramify
+git+https://github.com/luxai-qtrobot/paramify.git#egg=paramify
+
 # Deepface
 --extra-index-url https://developer.download.nvidia.com/compute/redist/jp/v512
 numpy==1.22
