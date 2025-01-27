@@ -7,14 +7,18 @@ import random
 import rospy
 import time
 import copy
-from threading import Lock, Thread
+from threading import Lock
 
 from kinematics.kinematic_interface import QTrobotKinematicInterface
+from utils.base_node import BaseNode
 
 
-class IdleAttention:    
+class IdleAttention(BaseNode):    
 
-    def __init__(self, attention_time=5, human_tracker=None):
+    def setup(self, 
+              attention_time=5,
+              human_tracker=None):
+        print(f"{self.name}", attention_time)
         self.attention_time = attention_time
         self.human_tracker = human_tracker
         self.pay_attention = False
@@ -25,8 +29,6 @@ class IdleAttention:
             self.human_tracker.human_detector.register_callback(self._human_presence_callback)
         else:
             self.ikin = QTrobotKinematicInterface()
-        self.processing_thread = Thread(target=self.process, daemon=True)        
-        self.processing_thread.start()
 
 
     def _human_presence_callback(self, persons):
@@ -40,7 +42,6 @@ class IdleAttention:
         self.persons_lock.release()
         
 
-
     def _forget_absences(self):
         self.persons_lock.acquire()
         keys_to_remove = [id for id, data in self.persons.items() if time.time() - data['last_seen'] > 2.0]
@@ -50,33 +51,36 @@ class IdleAttention:
 
 
     def process(self):
-        while not rospy.is_shutdown():
-            if not self.pay_attention:
-                rospy.sleep(1)
-                continue
-            
-            self._forget_absences()
-            self.persons_lock.acquire()
-            if self.persons and self.human_tracker:
-                random_person = random.choice(list(self.persons.values()))
-                # print(f"tracking {random_person.get('id')}...")
-                self.human_tracker.track(random_person)
-            else:                
-                xyz = [2.0, random.uniform(-1, 1), 0.65 ]   
-                # print(f'random look {xyz}...')
-                self.ikin.look_at_xyz(xyz)
-            self.persons_lock.release()
-            rospy.sleep(self.attention_time)
+        if not self.pay_attention:
+            rospy.sleep(1)
+            return
+        
+        self._forget_absences()
+        self.persons_lock.acquire()
+        if self.persons and self.human_tracker:
+            random_person = random.choice(list(self.persons.values()))
+            # print(f"tracking {random_person.get('id')}...")
+            self.human_tracker.track(random_person)
+        else:                
+            xyz = [2.0, random.uniform(-1, 1), 0.65 ]   
+            # print(f'random look {xyz}...')
+            self.ikin.look_at_xyz(xyz)
+        self.persons_lock.release()
+        rospy.sleep(self.attention_time)
             
 
     def start(self):
         self.stop()
         self.pay_attention = True
-        print('idle attention sarted.')
+        rospy.loginfo('idle attention sarted.')
 
 
     def stop(self):        
         self.pay_attention = False
         if self.human_tracker:
             self.human_tracker.untrack()
-        print('idle attention stopped.')
+        rospy.loginfo('idle attention stopped.')
+
+
+    def cleanup(self):    
+        rospy.loginfo(f"{self.name} is terminating...")

@@ -5,11 +5,9 @@
 # This software is released under the MIT License.
 # https://opensource.org/licenses/MIT
 
-import time
 import json
 import os
 import re
-import argparse
 from threading import Lock
 import rospy
 from enum import Enum
@@ -25,12 +23,15 @@ from idle_attention import IdleAttention
 from riva_speech_recognition_vad import RivaSpeechRecognitionSilero
 from scene_detection import SceneDetection
 
+from paramify.paramify_web import ParamifyWeb
+from utils.base_node import BaseNode
+
 def pretty_print(item):
     print(json.dumps(item, indent=2))
 
 
 
-class QTAIDataAssistant:
+class QTAIDataAssistant(ParamifyWeb, BaseNode):
     IDLE_INTERACTION_TIMEOUT = 1 * 60 # seconds
 
     class InteractionState(Enum):
@@ -41,27 +42,29 @@ class QTAIDataAssistant:
         PAUSED = 5    
 
     def __init__(self, 
-                 model='llama3.1', 
-                 document_path="~/Documents", 
-                 document_formats=['.pdf'],
-                 max_num_documents=5,
-                 language='en-US',
-                 mem_store_file=None,
-                 scene_procesing=False,
-                 disable_rag=False):
-        self.chat = ChatWithRAG(model=model,
-                                system_role=ConversationPrompt['system_role'],
-                                document_path=document_path,
-                                max_num_documents=max_num_documents,
-                                document_formats=document_formats,
-                                scene_procesing=scene_procesing,
-                                disable_rag=disable_rag,
-                                mem_store_file=mem_store_file)
-        self.language = language        
+                 config=None,
+                 port: int = 6060):        
+
+        # Initialize ParamifyWeb
+        ParamifyWeb.__init__(self, config=config, port=port)
+        # Initialize BaseNode        
+        BaseNode.__init__(self, paused=self.parameters.paused)
+
+
+    def setup(self):
+        # set the default system prompt if it is not set via parameters
+        if not self.parameters.role or not self.parameters.role.strip():
+            self.set_role(ConversationPrompt['system_role'])
+
+        # initialize chat engine
+        self.chat = None
+        self.chat = self._reset_chat_engine()
+
+        self.language = self.parameters.lang
         self.state = None
         self.state_lock = Lock()
         self.finish = False
-        self.paused = False 
+        self.hold_on = False 
         self.active_speaker = None
         self.last_interaction_time = rospy.get_time()
         self.command_interface = CommandInterface(self._function_call_response_callback)
@@ -70,39 +73,60 @@ class QTAIDataAssistant:
         self.vad_enabled = self.vad_enabled and self.command_interface.set_respeaker_param("AGCGAIN", 40)
 
         self.asr = RivaSpeechRecognitionSilero(
-            language=language,
-            use_vad=self.vad_enabled,
-            event_callback=self.asr_event_callback
-            )
-        self.human_detector = HumanPresenceDetection(detection_framerate=5, external_vad_trigger=True)
+            setup_kwargs={
+                'language': self.language,
+                'use_vad': self.vad_enabled,
+                'event_callback': self.asr_event_callback
+                },
+            paused=self.parameters.paused)
+        
+        self.human_detector = HumanPresenceDetection(
+            setup_kwargs={
+                'detection_framerate': 5,
+                'external_vad_trigger': True
+            },
+            paused=self.parameters.paused)
+            
         self.human_detector.register_callback(self._human_presence_callback)
         self.human_tracker = HumanTracking(human_detector=self.human_detector)
-        self.idle_attention = IdleAttention(attention_time=5, human_tracker=self.human_tracker)
         
-        self.scene_detector = SceneDetection(contineous_detection=True, detection_framerate=0.1) if scene_procesing else None
-        if self.scene_detector:
-            self.scene_detector.register_callback(self._scene_derection_callback)
-
+        self.idle_attention = IdleAttention(setup_kwargs={'attention_time':5, 'human_tracker':self.human_tracker}, paused=self.parameters.paused)
+        
+        self.scene_detector = SceneDetection(setup_kwargs={'detection_framerate': 0.1}, paused=(self.parameters.paused or not self.parameters.enable_scene))
+        self.scene_detector.register_callback(self._scene_derection_callback)
 
 
         # get current robot attention pos
         self.robot_attention_pos =  None # self.command_interface.ikin.get_head_pos()      
 
         # set the tts language/voice (for acapela)  
-        ret = self.command_interface.set_languge(language, 0, 100)
-        rospy.loginfo(f"Setting TTS languge to '{language}': {ret}")
-        print(colored(
-            f"QTAIDataAssistant initialized with:\n"
-            f"llm model:        {model}\n"
-            f"language:         {language}\n"
-            f"documents path:   {document_path}\n"
-            f"document formats: {document_formats}\n"
-            f"max num. of docs: {max_num_documents}\n"
-            f"scene procesing:  {scene_procesing}\n"
-            f"using RAG:        {not disable_rag}\n",
-            'green'))
+        ret = self.command_interface.set_languge(self.language, 0, 100)
+        rospy.loginfo(f"Setting TTS languge to '{self.language}': {ret}")
+
+        ret = self.command_interface.set_volume(self.parameters.volume)
+        rospy.loginfo(f"Setting robot's volume level to '{self.parameters.volume}': {ret}")
 
 
+        print("")
+        print(colored(self, 'green'))
+        print("")
+
+        self._reset_interaction()
+
+
+    def _reset_chat_engine(self):
+        if self.chat:
+            self.chat.close()
+            del self.chat
+        self.chat = ChatWithRAG(model=self.parameters.llm,
+                        system_role= self.parameters.role,
+                        document_path=self.parameters.docs,
+                        max_num_documents=self.parameters.max_docs,
+                        document_formats=self.parameters.formats,
+                        scene_procesing=self.parameters.enable_scene,
+                        disable_rag=self.parameters.disable_rag,
+                        mem_store_file=self.parameters.mem_store)
+        return self.chat
 
     def _function_call_response_callback(self, function, result):
         self._set_state(QTAIDataAssistant.InteractionState.PROCESSING)
@@ -128,32 +152,40 @@ class QTAIDataAssistant:
         elif f_name == 'pause_interaction':
             rospy.loginfo(f"responding to {f_name} for {user}")
             self._set_state(QTAIDataAssistant.InteractionState.PAUSED)
-            self.paused = True            
+            self.hold_on = True            
             self.command_interface.show_emotion("QT/confused")
             self.rest_robot_attention()
             self._reset_interaction()
             
         elif f_name == 'resume_interaction':
             rospy.loginfo(f"responding to {f_name} for {user}")
-            self.paused = True
+            self.hold_on = False
 
         elif f_name == 'set_language':
             # TODO: check if tts is set correctly by checking the 'ret'
             #       use try catch around RivaASR ans test it first to see it set properly
             rospy.loginfo(f"responding to {f_name} for {user}")            
-            language = function.get('code')
-            ret = self.command_interface.set_languge(language, 0, 100)
-            rospy.loginfo(f"Setting TTS languge to '{language}': {ret}")
-            self.asr.stop()
-            self.asr = RivaSpeechRecognitionSilero(language=language, use_vad=self.vad_enabled, event_callback=self.asr_event_callback)
-            rospy.loginfo(f"Riva ASR set to '{language}'")
-            confirmation = {"en-US": "Sure!", "en-GB": "Sure!", "ar-AR": "بالتأكيد!", "de-DE": "Sicher!", "es-ES": "¡Claro!", "fr-FR": "Bien sûr!", "hi-IN": "ज़रूर!", "it-IT": "Certo!", "ja-JP": "もちろん!", "ru-RU": "Конечно!", "ko-KR": "물론이야!", "pt-BR": "Claro!", "zh-CN": "当然!"}
-            self.command_interface.execute([{"command": "talk", "message": confirmation.get(language, "")}])
+            self._set_language(function.get('code'))
             
         elif f_name in ['look_at_xyz', 'look_at_pixel'] and function.get('duration', 0) == 0:            
             self.robot_attention_pos = self.command_interface.ikin.get_head_pos()
             rospy.loginfo(f"updated robot attention pos to {self.robot_attention_pos}" )
 
+    def _set_language(self, language:str):
+            ret = self.command_interface.set_languge(language, 0, 100)
+            rospy.loginfo(f"Setting TTS languge to '{language}': {ret}")
+            self.asr.terminate()            
+            self.asr = RivaSpeechRecognitionSilero(
+                setup_kwargs={
+                    'language': self.language,
+                    'use_vad': self.vad_enabled,
+                    'event_callback': self.asr_event_callback
+                    },
+                paused=self.parameters.paused)
+            
+            rospy.loginfo(f"Riva ASR set to '{language}'")
+            confirmation = {"en-US": "Sure!", "en-GB": "Sure!", "ar-AR": "بالتأكيد!", "de-DE": "Sicher!", "es-ES": "¡Claro!", "fr-FR": "Bien sûr!", "hi-IN": "ज़रूर!", "it-IT": "Certo!", "ja-JP": "もちろん!", "ru-RU": "Конечно!", "ko-KR": "물론이야!", "pt-BR": "Claro!", "zh-CN": "当然!"}
+            self.command_interface.execute([{"command": "talk", "message": confirmation.get(language, "")}])
 
     def _set_state(self, state):        
         with self.state_lock:
@@ -218,13 +250,13 @@ class QTAIDataAssistant:
         self._set_state(QTAIDataAssistant.InteractionState.PROCESSING)
         self.acknowledged = False   
         try:      
-            if self.paused:
+            if self.hold_on:
                 rospy.loginfo("Interaction paused. say 'start conversation' to restart the concersartion.")            
                 resp = self.chat.get_raw_chat(WakeupPrompt['system_role'], text)                 
                 if resp.replace('\n', '').replace('.', '').strip().lower()  == 'no':
                     self.command_interface.show_emotion("QT/confused")
                 else:
-                    self.paused = False
+                    self.hold_on = False
                     rospy.loginfo("Interraction restarted.")
                     self._set_state(QTAIDataAssistant.InteractionState.RESPONDING)
                     self.command_interface.execute([{"command": "talk", "message": resp}])
@@ -266,95 +298,85 @@ class QTAIDataAssistant:
 
 
     
-    def stop(self):
-        # stop asr 
-        self.asr.stop()
+    def cleanup(self):
+        rospy.loginfo("qt_ai_data_assistant shutting down...") 
+        self.asr.terminate()
+        self.human_detector.terminate()
+        self.scene_detector.terminate() if self.scene_detector else None
+        self.idle_attention.terminate()
         self.chat.close()
+        
 
-
-    def start(self):
+    def process(self):
         self._reset_interaction()
+        try:
+            self._set_state(QTAIDataAssistant.InteractionState.IDLE)
+            rospy.loginfo("waiting fo speech command...")
+            text, lang = self.asr.recognize_once()
+            if text:                        
+                self._asr_callback(text, lang)
+                self.last_interaction_time = rospy.get_time()                
+            if rospy.get_time() - self.last_interaction_time > QTAIDataAssistant.IDLE_INTERACTION_TIMEOUT:
+                self.last_interaction_time = rospy.get_time() # to avoid reseting interaction everytime
+                self._reset_interaction()
+        except Exception as e:
+            rospy.logerr(str(e))
+    
 
-        while not rospy.is_shutdown():            
-            try:
-                self._set_state(QTAIDataAssistant.InteractionState.IDLE)
-                rospy.loginfo("waiting fo speech command...")
-                text, lang = self.asr.recognize_once()
-                if text:                        
-                    self._asr_callback(text, lang)
-                    self.last_interaction_time = rospy.get_time()                
-                if rospy.get_time() - self.last_interaction_time > QTAIDataAssistant.IDLE_INTERACTION_TIMEOUT:
-                    self.last_interaction_time = rospy.get_time() # to avoid reseting interaction everytime
-                    self._reset_interaction()
-            except Exception as e:
-                rospy.logerr(str(e))
-        self.stop()                
+    def on_disable_rag_set(self, value):
+        rospy.loginfo(f"disable_rag param set to {value}")
+        self.chat = self._reset_chat_engine()
+
+    def on_enable_scene_set(self, value):
+        rospy.loginfo(f"enable_scene param set to {value}")
+        if not value:
+            self.scene_detector.pause()
+            return
+        self.chat = self._reset_chat_engine()
+        self.scene_detector.resume()
+
+    def on_lang_set(self, value):        
+        rospy.loginfo(f"lang param set to {value}")
+        self._set_language(value)
+
+    def on_hold_on_set(self, value):
+        rospy.loginfo(f"hold_on param set to {value}")
+        self.hold_on = value
+
+    def on_paused_set(self, value):        
+        rospy.loginfo(f"paused param set to {value}")
+        if value:
+            self.asr.pause()
+            self.human_detector.pause()
+            self.scene_detector.pause()
+            self.idle_attention.pause()
+            self.pause()
+        else: 
+            self.asr.resume()
+            self.human_detector.resume()
+            self.scene_detector.resume() if self.parameters.enable_scene else None
+            self.idle_attention.resume()
+            self.resume()        
+
+    def on_volume_set(self, value):           
+        rospy.loginfo(f"volume param set to {value}")         
+        status = self.command_interface.set_volume(value)
+        if not status:
+            rospy.logwarn(f"Could not set robot's volume level to '{value}'")
 
 
 # main 
 if __name__ == '__main__':
 
-    parser = argparse.ArgumentParser(
-        description="",
-        epilog="example: qt_ai_data_assitant.py -d ~/my-docuemnts --formats .pdf .docx --max-docs 3 --lang en-US")
     
-    current_dir = os.path.dirname(os.path.abspath(__file__))   
-    default_documents_dir = os.path.abspath(os.path.join(current_dir, '..', 'documents'))
-    parser.add_argument("-d", "--docs", 
-                        help="Path to the folder containg documents to load",
-                        default=default_documents_dir,
-                        type=str)
-    
-    parser.add_argument("--formats",
-                        help="document formats ('.txt' '.pdf', '.docx', '.md').",
-                        nargs='+',
-                        default=[".pdf"],
-                        type=str)
-    
-    parser.add_argument("--max-docs",
-                        help="maximum number of docuemnt files load",
-                        default=5,
-                        type=int)
-
-
-    parser.add_argument("--lang",
-                        help="Conversation language (ar-AR, en-US, en-GB, de-DE, es-ES, es-US, fr-FR, hi-IN, it-IT, ja-JP, ru-RU, ko-KR, pt-BR, zh-CN)",
-                        default="en-US",
-                        type=str)
-
-    parser.add_argument("--llm",
-                        help="LLM model to use. default is llama3.1.",
-                        default="llama3.1",
-                        type=str)
-
-    parser.add_argument("--mem-store",
-                        help="path to a json file (e.g. ./chat_store.json) to store the and restore the conversation memeory",
-                        default=None,
-                        type=str)
-
-    parser.add_argument("--enable-scene", 
-                        help="Enables camera feed scene processing",
-                        action="store_true")
-
-    parser.add_argument("--disable-rag", 
-                        help="Disable Retrieval-Augmented Generation",
-                        action="store_true")
-
-    args = parser.parse_args()
-        
     rospy.init_node('qt_ai_data_assistant')
     rospy.loginfo("starting...")
-    demo = QTAIDataAssistant(
-        document_path=args.docs,
-        language=args.lang,
-        document_formats=args.formats,
-        max_num_documents=args.max_docs,
-        model=args.llm,
-        mem_store_file=args.mem_store,
-        scene_procesing=args.enable_scene,
-        disable_rag=args.disable_rag)
 
-    rospy.loginfo("qt_ai_data_assistants started")
-    demo.start()    
-    rospy.loginfo("qt_ai_data_assistant shutting down") 
-    
+    current_dir = os.path.dirname(os.path.abspath(__file__))   
+    demo = QTAIDataAssistant(config=os.path.join(os.path.dirname(current_dir), "config", "default.yaml"))
+
+    rospy.loginfo(f"qt_ai_data_assistants started (Paused: {demo.parameters.paused})")
+    rospy.spin() 
+    # terminating     
+    demo.terminate()
+

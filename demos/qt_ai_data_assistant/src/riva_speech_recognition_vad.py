@@ -17,6 +17,7 @@ import math
 import numpy as np
 import torch
 
+from utils.base_node import BaseNode
 
 class SileroVAD():
     def __init__(self, confidence_threshold=0.6, rate=16000):
@@ -179,7 +180,7 @@ class MicrophoneStream:
         return not self.closed
 
 
-class RivaSpeechRecognitionSilero:
+class RivaSpeechRecognitionSilero(BaseNode):
     class Event(Enum):
         STARTED = 1
         RECOGNIZING = 2
@@ -187,15 +188,16 @@ class RivaSpeechRecognitionSilero:
         STOPPED = 4
         CANCELED = 5
 
-    def __init__(self, language='en-US', 
-                 detection_timeout=5, 
-                 event_callback=None,
-                 use_vad=False):
+    def setup(self, 
+              language='en-US', 
+              detection_timeout=5, 
+              event_callback=None,
+              use_vad=False,
+              continuous_recog_callback=None):
+        
         self.use_vad = use_vad
         self.event_callback = event_callback    
-        self.finished = False
-        self._is_paused = Event()
-        self._is_paused.clear()  # Start in paused state
+        self.continuous_recog_callback = continuous_recog_callback
         self.detection_timeout = detection_timeout
         
         self.audio_rate = 16000
@@ -248,8 +250,10 @@ class RivaSpeechRecognitionSilero:
         self.asr_service = riva.client.ASRService(self.auth)
 
 
-    def _callback_audio_stream(self, msg):         
-        self.microphone_stream.put_chunk(bytes(msg.data))
+    def _callback_audio_stream(self, msg):
+        # avoid overloading cpu if asked to be paused
+        if not self.paused(): 
+            self.microphone_stream.put_chunk(bytes(msg.data))
 
 
     def _proccess_asr_events(self):
@@ -269,22 +273,9 @@ class RivaSpeechRecognitionSilero:
         finally:
             self.asr_event_queue.put_nowait(evt)
 
-    def pasuse(self):
-        self._is_paused.set()
-
-    def resume(self):
-        self._is_paused.clear()
 
 
     def recognize_once(self):               
-        # self._is_paused.wait()
-        # if self.finished:
-        #     return None        
-        # example : if audio rate is 16000 and respeaker buffersize is 512, then the last one second will be around 31 item in queue
-        # while self.audio_queue.qsize() > int(16000 / 512 / 2):
-        #     self.audio_queue.get()          
-        #        
-
         self.microphone_stream.reset()
         if self.use_vad:
             rospy.logdebug('waiing for voice activity...')
@@ -334,20 +325,22 @@ class RivaSpeechRecognitionSilero:
         return None, None
 
 
-    def stop(self):        
-        self.finished = True
-        self._is_paused.clear()        
-        self.audio_chunk_iterator.__exit__(None, None, None)
 
-
-    def recognize(self, recognition_callback):
-        self.finished = False
-        while not rospy.is_shutdown() and not self.finished:
+    def process(self):        
+        if self.continuous_recog_callback:
             try:                
                 text, lang = self.recognize_once()
                 if text:
-                    recognition_callback(text, lang)
+                    self.continuous_recog_callback(text, lang)
             except Exception as e:
                 rospy.logerr(str(e))
+        else:
+            self.terminate_event.wait() # disable continuous recognition if continuous_recog_callback is none!
+            
+
+    def cleanup(self): 
+        rospy.loginfo(f"{self.name} is terminating..")       
+        self.audio_chunk_iterator.__exit__(None, None, None)
+
 
 
