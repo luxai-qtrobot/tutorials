@@ -100,7 +100,7 @@ class QTAIDataAssistant(ParamifyWeb, BaseNode):
         self.robot_attention_pos =  None # self.command_interface.ikin.get_head_pos()      
 
         # set the tts language/voice (for acapela)  
-        ret = self.command_interface.set_languge(self.language, 0, 100)
+        ret = self.command_interface.guge(self.language, 0, 100)
         rospy.loginfo(f"Setting TTS languge to '{self.language}': {ret}")
 
         ret = self.command_interface.set_volume(self.parameters.volume)
@@ -177,7 +177,7 @@ class QTAIDataAssistant(ParamifyWeb, BaseNode):
             self.asr.terminate()            
             self.asr = RivaSpeechRecognitionSilero(
                 setup_kwargs={
-                    'language': self.language,
+                    'language': language,
                     'use_vad': self.vad_enabled,
                     'event_callback': self.asr_event_callback
                     },
