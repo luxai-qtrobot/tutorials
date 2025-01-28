@@ -100,7 +100,7 @@ class QTAIDataAssistant(ParamifyWeb, BaseNode):
         self.robot_attention_pos =  None # self.command_interface.ikin.get_head_pos()      
 
         # set the tts language/voice (for acapela)  
-        ret = self.command_interface.guge(self.language, 0, 100)
+        ret = self.command_interface.set_languge(self.language, 0, 100)
         rospy.loginfo(f"Setting TTS languge to '{self.language}': {ret}")
 
         ret = self.command_interface.set_volume(self.parameters.volume)
@@ -172,7 +172,7 @@ class QTAIDataAssistant(ParamifyWeb, BaseNode):
             rospy.loginfo(f"updated robot attention pos to {self.robot_attention_pos}" )
 
     def _set_language(self, language:str):
-            ret = self.command_interface.set_languge(language, 0, 100)
+            ret = self.command_interface.set_languge(language, 0, 100)        
             rospy.loginfo(f"Setting TTS languge to '{language}': {ret}")
             self.asr.terminate()            
             self.asr = RivaSpeechRecognitionSilero(
