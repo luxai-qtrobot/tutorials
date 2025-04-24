@@ -82,16 +82,16 @@ Following is an overview of the key technologies and services employed to implem
 
 
 ## Getting Started
-The QTrobot Data Assistant requires QTrobotAI@Edge and an initial internet connection for installation and setup.
+The QTrobot Data Assistant can run on all variants of QTrobot for Research version.
 
 ### Installation
 :::info Notice
- - The project's source code is available in the *[LuxAI Tutorials Github Repository](https://github.com/luxai-qtrobot/tutorials/tree/master/demos/qt_ai_data_assistant)*. To get the latest version of the code on your **QTPC** (Nvidia Jetson): `cd ~/robot/code/tutorials/; git pull`
+ - The project's source code is available in the *[LuxAI Tutorials Github Repository](https://github.com/luxai-qtrobot/tutorials/tree/master/demos/qt_ai_data_assistant_online)*. To get the latest version of the code on your **QTPC**: `cd ~/robot/code/tutorials/; git pull`
  - Ensure that *software*  repository on **QTPC** is updated and service files for `qt_respeaker_app` is installed in your catkin workspace: 
     - `cd ~/robot/code/software/; git pull`
     - `cd ~/catkin_ws/; ln -s ~/robot/code/software/headers/qt_respeaker_app/ ./src`
     - `cd ~/catkin_ws/; catkin_make`
-- Throughout this documentation, we will refer to *"~/robot/code/tutorials/demos/qt_ai_data_assistant"* as *"qt_ai_data_assistant"*.
+- Throughout this documentation, we will refer to *"~/robot/code/tutorials/demos/qt_ai_data_assistant_online"* as *"qt_ai_data_assistant_online"*.
 :::
 
 The installation process involves three main steps: ***(1) Installing Nvidia Riva ASR***, ***(2) Installing Ollama and required models*** and ***(3) Installing python packages*** 
@@ -139,7 +139,7 @@ The installation process involves three main steps: ***(1) Installing Nvidia Riv
 2. **Install ollama and pull the required models:**
     - We have prepared a script (`install_ollama.sh`) to download and install the appropriate version of ollama on QTrobot's Jetson AGX Orin. To install Ollama, execute the following command:
       ```bash
-      cd qt_ai_data_assistant
+      cd qt_ai_data_assistant_online
       sudo bash ./scripts/install_ollama.sh
       ```
 
@@ -168,7 +168,7 @@ The installation process involves three main steps: ***(1) Installing Nvidia Riv
 3. **Install required python packages:**
     - Create a python3 virtual environment and install pip packages:    
       ```bash
-      cd qt_ai_data_assitant
+      cd qt_ai_data_assistant_online
       python3 -m venv venv
       source venv/bin/activate 
       pip install --upgrade pip
@@ -190,9 +190,9 @@ bash ./riva_start.sh ./config.sh -s
 #### Run the QTrobot Data Assistant with demo data:
 The repository includes a demo PDF file detailing the QTrobot research variants and specifications. To run the project with this demo document: 
 ```bash
-cd qt_ai_data_assistant
+cd qt_ai_data_assistant_online
 source venv/bin/activate
-python src/qt_ai_data_assistant.py
+python src/qt_ai_data_assistant_online.py
 ```
 Wait a few seconds for the script to initialize and load the document. Once it's ready, you can begin conversing with the QTrobot. For example, you might ask, *"What are all your variants?"* or *"How can I program QTrobot?"* You can also ask questions unrelated to the document, such as, *"What are the official languages of Luxembourg?"*
 
@@ -201,12 +201,12 @@ To run the QTrobot Data Assistant with your own data, first create a folder to s
 ```bash
 mkdir ~/Documents/qt-assistant-data
 ```
-Copy your PDF file(s) into your project's document folder (`~/Documents/qt-assistant-data`). For example, you can use one of your research papers. Then, simply start the `qt_ai_data_assistant.py` script and provide the path to your document folder.
+Copy your PDF file(s) into your project's document folder (`~/Documents/qt-assistant-data`). For example, you can use one of your research papers. Then, simply start the `qt_ai_data_assistant_online.py` script and provide the path to your document folder.
 
 ```bash
-cd qt_ai_data_assistant
+cd qt_ai_data_assistant_online
 source venv/bin/activate
-python src/qt_ai_data_assistant.py -d ~/Documents/qt-assistant-data
+python src/qt_ai_data_assistant_online.py -d ~/Documents/qt-assistant-data
 ```
 Wait a few seconds for the script to initialize and load the document. Once it's ready, you can ask questions about the content of your PDF.    
 
@@ -244,12 +244,12 @@ cd ~/robot/riva_quickstart_arm64_v2.14.0
 bash ./riva_start.sh ./config.sh -s
 ```
 
-Once Riva ASR is running, you can start the `qt_ai_data_assistant.py` script and provide the conversation language code:
+Once Riva ASR is running, you can start the `qt_ai_data_assistant_online.py` script and provide the conversation language code:
  
 ```bash
-cd qt_ai_data_assistant
+cd qt_ai_data_assistant_online
 source venv/bin/activate
-python src/qt_ai_data_assistant.py --lang fr-FR
+python src/qt_ai_data_assistant_online.py --lang fr-FR
 ```
 
 The `--lang <lang code>` parameter sets both the ASR and TTS languages to the specified language.
@@ -263,9 +263,9 @@ By default QTrobot Data Assistant loads PDF (`.pdf`) documents from the specifie
 
 For example, to load a maximum of 5 PDF and DOCX files from `~/Documents/qt-assistant-data`, use the following commands:
 ```bash
-cd qt_ai_data_assistant
+cd qt_ai_data_assistant_online
 source venv/bin/activate
-python src/qt_ai_data_assistant.py --formats .pdf .docx --max-docs 5
+python src/qt_ai_data_assistant_online.py --formats .pdf .docx --max-docs 5
 ``` 
 
 #### Customizing the QTrobot's Role
@@ -342,12 +342,12 @@ By default, QTrobot Data Assistant uses the  [**Mata Llama 3.1**](https://llama.
 ```bash
 ollama pull gemma2  
 ```
-Next, start the `qt_ai_data_assistant.py` script and specify the LLM model as a parameter:
+Next, start the `qt_ai_data_assistant_online.py` script and specify the LLM model as a parameter:
 
 ```bash
-cd qt_ai_data_assistant
+cd qt_ai_data_assistant_online
 source venv/bin/activate
-python src/qt_ai_data_assistant.py --llm gemma2
+python src/qt_ai_data_assistant_online.py --llm gemma2
 ```
 
 #### Enabling scene undertanding:
@@ -358,15 +358,15 @@ First, pull the Moondream model using the Ollama command. The model is approxima
 ollama pull moondream 
 ```
 
-Next, start the `qt_ai_data_assistant.py` script and enable scene understanding with the following parameter:
+Next, start the `qt_ai_data_assistant_online.py` script and enable scene understanding with the following parameter:
 
 ```bash
-cd qt_ai_data_assistant
+cd qt_ai_data_assistant_online
 source venv/bin/activate
-python src/qt_ai_data_assistant.py --enable-scene
+python src/qt_ai_data_assistant_online.py --enable-scene
 ```
 
-When enabled, the `SceneDetection` module will periodically query the VLM (by default every 10 seconds) and use the scene description as additional context for the LLM. After enabling the scene feature in `qt_ai_data_assistant.py`, wait for a short time and then start interacting with QTrobot. You can ask questions like, *"Tell me what you see,"* or *"How many people do you see now?"*
+When enabled, the `SceneDetection` module will periodically query the VLM (by default every 10 seconds) and use the scene description as additional context for the LLM. After enabling the scene feature in `qt_ai_data_assistant_online.py`, wait for a short time and then start interacting with QTrobot. You can ask questions like, *"Tell me what you see,"* or *"How many people do you see now?"*
 
 ***Note:*** *Enabling scene understanding may introduce a slight delay in QTrobot's response time due to increased GPU usage and inference time required by Ollama during LLM and VLM processing at the same time*
 
@@ -374,29 +374,29 @@ When enabled, the `SceneDetection` module will periodically query the VLM (by de
 #### Disabling Retrieval-Augmented Generation:
 In some cases, you may not need to use the Retrieval-Augmented Generation (RAG) feature, especially if the application does not require any user-provided documents or knowledge. Disabling RAG allows QTrobot to interact directly with the LLM for faster, more fluent conversations, as it reduces the processing overhead and latency associated with retrieving and integrating external data.
 
-To disable RAG, simply start the qt_ai_data_assistant.py script with the `--disable-rag` parameter:
+To disable RAG, simply start the qt_ai_data_assistant_online.py script with the `--disable-rag` parameter:
 ```bash
-cd qt_ai_data_assistant
+cd qt_ai_data_assistant_online
 source venv/bin/activate
-python src/qt_ai_data_assistant.py --disable-rag
+python src/qt_ai_data_assistant_online.py --disable-rag
 ```
 When RAG is disabled, QTrobot will no longer retrieve information from documents or external sources, and all responses will be generated directly by the LLM based on the content provided in the `system_role`. This can improve response times and is ideal when external knowledge retrieval is not needed for your use case.
 
 #### Storing and restoring conversations
-To save the entire conversation and restore it later, simply run the `qt_ai_data_assistant.py` script and specify the path to the JSON file where the conversation memory will be stored.
+To save the entire conversation and restore it later, simply run the `qt_ai_data_assistant_online.py` script and specify the path to the JSON file where the conversation memory will be stored.
 - If the JSON file already exists, the conversation memory will be loaded from it at the start.
 - If the file does not exist, a new one will be created to store the conversation.
 
 Example usage:
 ```bash 
-python qt_ai_data_assistant.py --mem-store ~/chat_store.json
+python qt_ai_data_assistant_online.py --mem-store ~/chat_store.json
 ```
 
 #### Command-line parameters
 ```bash
-python qt_ai_data_assistant.py --help
+python qt_ai_data_assistant_online.py --help
 
-usage: qt_ai_data_assistant.py [-h] [-d DOCS] [--formats FORMATS [FORMATS ...]] [--max-docs MAX_DOCS] [--lang LANG] [--llm LLM] [--mem-store MEM_STORE] [--enable-scene] [--disable-rag]
+usage: qt_ai_data_assistant_online.py [-h] [-d DOCS] [--formats FORMATS [FORMATS ...]] [--max-docs MAX_DOCS] [--lang LANG] [--llm LLM] [--mem-store MEM_STORE] [--enable-scene] [--disable-rag]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -415,7 +415,7 @@ example: qt_ai_data_assitant.py -d ~/my-docuemnts --formats .pdf .docx --max-doc
 ```
 
 ## License
-This project is licensed under the MIT License. See the [LICENSE](https://github.com/luxai-qtrobot/tutorials/blob/master/demos/qt_ai_data_assistant/LICENSE) file for details.
+This project is licensed under the MIT License. See the [LICENSE](https://github.com/luxai-qtrobot/tutorials/blob/master/demos/qt_ai_data_assistant_online/LICENSE) file for details.
 
 ### Copyright
 © 2024 LuxAI S.A. All rights reserved.
