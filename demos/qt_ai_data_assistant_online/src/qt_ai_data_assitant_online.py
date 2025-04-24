@@ -32,7 +32,7 @@ from paramify.paramify_web import ParamifyWeb
 from utils.base_node import BaseNode
 
 
-class QTAIAgent(ParamifyWeb, BaseNode):
+class QTAIDataAssistantOnline(ParamifyWeb, BaseNode):
     IDLE_INTERACTION_TIMEOUT = 1 * 60 # seconds
 
     class InteractionState(Enum):
@@ -217,7 +217,7 @@ class QTAIAgent(ParamifyWeb, BaseNode):
         return self.chat
 
     def _function_call_response_callback(self, function, result):
-        self._set_state(QTAIAgent.InteractionState.PROCESSING)
+        self._set_state(QTAIDataAssistantOnline.InteractionState.PROCESSING)
         f_name = function.get('command')
         f_id = function.get('fid')
         user = function.get('user')
@@ -239,7 +239,7 @@ class QTAIAgent(ParamifyWeb, BaseNode):
             
         elif f_name == 'pause_interaction':
             Logger.info(f"responding to {f_name} for {user}")
-            self._set_state(QTAIAgent.InteractionState.PAUSED)
+            self._set_state(QTAIDataAssistantOnline.InteractionState.PAUSED)
             self.hold_on = True            
             self.command_interface.show_emotion("QT/confused")
             self.rest_robot_attention()
@@ -318,15 +318,15 @@ class QTAIAgent(ParamifyWeb, BaseNode):
     def asr_event_callback(self, event):
         if event == SpeechRecogntionEvent.RECOGNIZING:
             self.human_detector.on_vad_trigged()
-            if self._get_state() != QTAIAgent.InteractionState.LISTENING:
-                self._set_state(QTAIAgent.InteractionState.LISTENING)
+            if self._get_state() != QTAIDataAssistantOnline.InteractionState.LISTENING:
+                self._set_state(QTAIDataAssistantOnline.InteractionState.LISTENING)
                 self.acknowledge_human()
 
 
     def _asr_callback(self, text, language):     
         user_id = self.human_tracker.get_current_person_id()
         Logger.info(f"User {user_id}: {text}")
-        self._set_state(QTAIAgent.InteractionState.PROCESSING)
+        self._set_state(QTAIDataAssistantOnline.InteractionState.PROCESSING)
         self.acknowledged = False   
         try:      
             if self.hold_on:
@@ -337,7 +337,7 @@ class QTAIAgent(ParamifyWeb, BaseNode):
                 else:
                     self.hold_on = False
                     Logger.info("Interraction restarted.")
-                    self._set_state(QTAIAgent.InteractionState.RESPONDING)
+                    self._set_state(QTAIDataAssistantOnline.InteractionState.RESPONDING)
                     self.command_interface.execute([{"command": "talk", "message": resp}])
                 return                 
             
@@ -350,7 +350,7 @@ class QTAIAgent(ParamifyWeb, BaseNode):
 
 
     def proccess_response(self, user, response_stream):
-        self._set_state(QTAIAgent.InteractionState.RESPONDING)
+        self._set_state(QTAIDataAssistantOnline.InteractionState.RESPONDING)
         tool_call = None
         
         for msg in response_stream:
@@ -365,11 +365,11 @@ class QTAIAgent(ParamifyWeb, BaseNode):
             msg = re.sub(r'[*\\/#+"]', '', msg)
             msg = msg.replace("QTrobot", "Cutee robot")
             if msg.strip():
-                self._set_state(QTAIAgent.InteractionState.RESPONDING)
+                self._set_state(QTAIDataAssistantOnline.InteractionState.RESPONDING)
                 self.command_interface.execute([{"command": "talk", "message": msg}])
         
         if tool_call:
-            self._set_state(QTAIAgent.InteractionState.RESPONDING)
+            self._set_state(QTAIDataAssistantOnline.InteractionState.RESPONDING)
             self.command_interface.execute(commands=[tool_call])
 
         Logger.info('finished executing command')
@@ -378,7 +378,7 @@ class QTAIAgent(ParamifyWeb, BaseNode):
 
     
     def cleanup(self):
-        Logger.info("qt_ai_agent shutting down...") 
+        Logger.info("qt_ai_data_assistant_online shutting down...") 
         self.asr.terminate()
         self.human_detector.terminate()
         # self.scene_detector.terminate() if self.scene_detector else None
@@ -389,13 +389,13 @@ class QTAIAgent(ParamifyWeb, BaseNode):
     def process(self):
         self._reset_interaction()
         try:
-            self._set_state(QTAIAgent.InteractionState.IDLE)
+            self._set_state(QTAIDataAssistantOnline.InteractionState.IDLE)
             Logger.info("waiting fo speech command...")
             text, lang = self.asr.recognize_once()
             if text:                        
                 self._asr_callback(text, lang)
                 self.last_interaction_time = rospy.get_time()                
-            if rospy.get_time() - self.last_interaction_time > QTAIAgent.IDLE_INTERACTION_TIMEOUT:
+            if rospy.get_time() - self.last_interaction_time > QTAIDataAssistantOnline.IDLE_INTERACTION_TIMEOUT:
                 self.last_interaction_time = rospy.get_time() # to avoid reseting interaction everytime
                 self._reset_interaction()
         except Exception as e:
@@ -446,13 +446,13 @@ class QTAIAgent(ParamifyWeb, BaseNode):
 if __name__ == '__main__':
 
     
-    rospy.init_node('qt_ai_agent')
+    rospy.init_node('qt_ai_data_assistant_online')
     Logger.info("starting...")
 
     current_dir = os.path.dirname(os.path.abspath(__file__))   
-    demo = QTAIAgent(config=os.path.join(os.path.dirname(current_dir), "config", "default.yaml"))
+    demo = QTAIDataAssistantOnline(config=os.path.join(os.path.dirname(current_dir), "config", "default.yaml"))
 
-    Logger.info(f"qt_ai_agents started (Paused: {demo.parameters.paused})")
+    Logger.info(f"qt_ai_data_assistant_online started (Paused: {demo.parameters.paused})")
     rospy.spin() 
     # terminating     
     demo.terminate()
