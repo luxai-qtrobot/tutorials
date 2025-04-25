@@ -18,7 +18,7 @@ from command_interface import CommandInterface
 
 from llm.llm_llamaindex_groq import LLMLamaIndexGroq
 from utils.logger import Logger
-from vector_store.vector_store_astradb import VectorStoreAstraDB
+from vector_store.vector_store_faiss import VectorStoreFAISS
 
 from llm.llm_prompts import ConversationPrompt, WakeupPrompt
 from tracking.human_presence_detection import HumanPresenceDetection
@@ -182,12 +182,19 @@ class QTAIDataAssistantOnline(ParamifyWeb, BaseNode):
 
         # where to store the vector embeddings
         if not self.parameters.disable_rag and not self.vector_store_engine:
-            self.vector_store_engine = VectorStoreAstraDB(
-                token=os.environ.get('ASTRA_DB_TOKEN'),
-                endpoint=os.environ.get('ASTRA_DB_ENDPOINT'),
-                collection_name="qt_ai_agent_collection_openai" if self.parameters.llm_engine == 'openai' else "qt_ai_agent_collection_groq",
+            collection_name = "qt_ai_agent_collection_openai" if self.parameters.llm_engine == 'openai' else "qt_ai_agent_collection_groq"            
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            print(f"current_dir: {current_dir}")
+            self.vector_store_engine = VectorStoreFAISS(
+                persist_dir=os.path.join(current_dir, '..', f"data/{collection_name}"),
                 embedding_dimension=1536 if self.parameters.llm_engine == 'openai' else 384
             )
+
+            # self.vector_store_engine = VectorStoreAstraDB(
+            #     token=os.environ.get('ASTRA_DB_TOKEN'),
+            #     endpoint=os.environ.get('ASTRA_DB_ENDPOINT'),
+            #     collection_name="qt_ai_agent_collection_openai" if self.parameters.llm_engine == 'openai' else "qt_ai_agent_collection_groq",
+            #     embedding_dimension=1536 if self.parameters.llm_engine == 'openai' else 384)
 
         if self.parameters.llm_engine == 'openai':
             self.chat = LLMLamaIndexOpenAI(

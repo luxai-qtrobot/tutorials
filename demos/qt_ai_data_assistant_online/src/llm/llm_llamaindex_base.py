@@ -7,7 +7,7 @@ from abc import abstractmethod
 from typing import List, Tuple
 from threading import Lock
 
-from llama_index.core import VectorStoreIndex, Settings, StorageContext
+from llama_index.core import Settings
 from llama_index.core.memory import ChatMemoryBuffer
 from llama_index.core.storage.chat_store import SimpleChatStore
 from llama_index.core.llms import ChatMessage
@@ -102,24 +102,17 @@ class LLMLamaIndexBase:
 
 
         if not disable_rag:
-            Settings.embed_model = self.get_embedding_engine()
-                
+            Settings.embed_model = self.get_embedding_engine()                
             vector_store_engine = self.get_vector_store_engine()
-            storage_context = StorageContext.from_defaults(vector_store=vector_store_engine.get_store())
 
-            if vector_store_engine.is_empty() or reload_documents: 
-                
+            if vector_store_engine.is_empty() or reload_documents:                 
                 # clear existing index if any 
                 vector_store_engine.clear()                
                 self.documents = self.data_loader.get_documents()
-                self.index = VectorStoreIndex.from_documents(
-                    self.documents,
-                    storage_context=storage_context,
-                )
-
+                self.index = vector_store_engine.get_index(self.documents)                
             else:
-                Logger.info("Laoding existing index from astra db...")
-                self.index = VectorStoreIndex.from_vector_store(vector_store_engine.get_store())
+                Logger.info("Laoding existing index from storage...")
+                self.index = vector_store_engine.get_index()
 
 
             self.retriever = self.index.as_retriever()
@@ -220,6 +213,7 @@ class LLMLamaIndexBase:
         return response.message.content
         
 
+
     @abstractmethod
     def get_chat_engine(self):
         raise(NotImplementedError("get_llm_engine() must be implemented in the subclass."))
@@ -231,7 +225,7 @@ class LLMLamaIndexBase:
     @abstractmethod
     def get_vector_store_engine(self) -> VectorStoreBaseEngine:
         raise(NotImplementedError("get_llm_engine() must be implemented in the subclass."))
-
+    
     @abstractmethod
     def get_tools(self):
         raise(NotImplementedError("get_tools() must be implemented in the subclass."))

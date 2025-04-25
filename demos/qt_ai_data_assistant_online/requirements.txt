@@ -10,10 +10,11 @@ numpy
 llama-index-llms-groq
 llama-index-readers-file
 llama-index-readers-web
-llama-index-vector-stores-astra-db
 llama-index-embeddings-openai
 llama-index-embeddings-huggingface
-
+llama-index-vector-stores-faiss
+faiss-cpu
+# llama-index-vector-stores-astra-db
 
 # specific asr module 
 groq

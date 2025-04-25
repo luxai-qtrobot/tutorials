@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../s
 
 from utils.logger import Logger
 from llm.llm_llamaindex_openai import LLMLamaIndexOpenAI
-from vector_store.vector_store_astradb import VectorStoreAstraDB
+from vector_store.vector_store_faiss import VectorStoreFAISS
 from data_loader.simple_web_reader import SimpleWebReader
 
 
@@ -44,12 +44,17 @@ if __name__ == '__main__':
     )
 
     # where to store the vector embeddings
-    vector_store_engine = VectorStoreAstraDB(
-        token=os.environ.get('ASTRA_DB_TOKEN'),
-        endpoint=os.environ.get('ASTRA_DB_ENDPOINT'),
-        collection_name="my_collection_openai_news",
-        embedding_dimension=1536 # default for text-embedding-3-small used in LLMLamaIndexOpenAI
+    vector_store_engine = VectorStoreFAISS(
+        persist_dir=os.path.join(current_dir, 'data/my_collection_openai_news'),
+        embedding_dimension=1536 # default for BAAI/bge-small-en-v1.5 used in LLMLamaIndexGroq
     )
+
+    # vector_store_engine = VectorStoreAstraDB(
+    #     token=os.environ.get('ASTRA_DB_TOKEN'),
+    #     endpoint=os.environ.get('ASTRA_DB_ENDPOINT'),
+    #     collection_name="my_collection_openai_news",
+    #     embedding_dimension=1536 # default for text-embedding-3-small used in LLMLamaIndexOpenAI
+    # )
 
     chat = LLMLamaIndexOpenAI(
         api_key=os.environ.get('PENAI_API_KEY'),

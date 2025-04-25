@@ -12,6 +12,7 @@ from utils.logger import Logger
 from data_loader.local_files_reader import LocalFilesReader
 from llm.llm_llamaindex_groq import LLMLamaIndexGroq
 from vector_store.vector_store_astradb import VectorStoreAstraDB
+from vector_store.vector_store_faiss import VectorStoreFAISS
 
 
 SYSTEM_PROMOT = '''     
@@ -44,12 +45,17 @@ if __name__ == '__main__':
     )
 
     # where to store the vector embeddings
-    vector_store_engine = VectorStoreAstraDB(
-        token=os.environ.get('ASTRA_DB_TOKEN'),
-        endpoint=os.environ.get('ASTRA_DB_ENDPOINT'),
-        collection_name="my_collection_groq",
+    vector_store_engine = VectorStoreFAISS(
+        persist_dir=os.path.join(current_dir, 'data/my_collection_groq'),
         embedding_dimension=384 # default for BAAI/bge-small-en-v1.5 used in LLMLamaIndexGroq
     )
+
+    # vector_store_engine = VectorStoreAstraDB(
+    #     token=os.environ.get('ASTRA_DB_TOKEN'),
+    #     endpoint=os.environ.get('ASTRA_DB_ENDPOINT'),
+    #     collection_name="my_collection_groq",
+    #     embedding_dimension=384 # default for BAAI/bge-small-en-v1.5 used in LLMLamaIndexGroq
+    # )
 
     chat = LLMLamaIndexGroq(
         api_key=os.environ.get('GROQ_API_KEY'),
