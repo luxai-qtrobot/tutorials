@@ -1,0 +1,32 @@
+wheel
+rospkg
+pyyaml
+tenacity
+paramify
+numpy
+
+
+# for llama-index 
+llama-index-llms-groq
+llama-index-readers-file
+llama-index-readers-web
+llama-index-embeddings-openai
+llama-index-embeddings-huggingface
+llama-index-vector-stores-faiss
+faiss-cpu
+# llama-index-vector-stores-astra-db
+
+# specific asr module 
+groq
+# azure-cognitiveservices-speech
+# google-cloud-speech
+
+
+# for torch/audio/vision CPU version
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch
+torchaudio
+torchvision
+
+# for Yolo 
+ultralytics
