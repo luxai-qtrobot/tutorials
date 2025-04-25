@@ -20,30 +20,17 @@ import GitHubIcon from '@mui/icons-material/GitHub';
 
 ## Table of Contents
 
-- [QTrobot: Your AI Data Assistant](#qtrobot-your-ai-data-assistant)
+- [QTrobot: Your Online AI Data Assistant](#qtrobot-your-ai-data-assistant)
   - [Features](#features)
   - [Technologies Used](#technologies-used)
   - [Getting Started](#getting-started)
     - [Installation](#installation)
     - [Usage](#usage)
-      - [Run the QTrobot Data Assistant with demo data:](#run-the-qtrobot-data-assistant-with-demo-data)
-      - [Run the QTrobot Data Assistant with your own data:](#run-the-qtrobot-data-assistant-with-your-own-data)
-      - [Pause and Resume the conversation with voice command](#pause-and-resume-the-conversation-with-voice-command)
-    - [Customization](#customization)
-      - [Using a different converation language:](#using-a-different-converation-language)
-      - [Using different document formats:](#using-different-document-formats)
-      - [Customizing the QTrobot's Role](#customizing-the-qtrobots-role)
-        - [Why Customizing the Role is Interesting](#why-customizing-the-role-is-interesting)
-      - [Choosing a different LLM model for conversation:](#choosing-a-different-llm-model-for-conversation)      
-      - [Enabling scene undertanding](#enabling-scene-undertanding)
-      - [Disabling Retrieval-Augmented Generation](#disabling-retrieval-augmented-generation)
-      - [Storing and restoring conversations](#storing-and-restoring-conversations)
-      - [Command-line parameters](#command-line-parameters)
   - [License](#license)
 
 ## Features
 
-- **Retrieval-Augmented Generation (RAG):** Enhances QTrobot's ability to provide accurate and context-aware answers by retrieving relevant information from user-provided documents (e.g. `.txt`, `.pdf`, `.docx`, `.md`) and simple web pages. This retrieval is powered by semantic search over documents indexed in the cloud using AstraDB.
+- **Retrieval-Augmented Generation (RAG):** Enhances QTrobot's ability to provide accurate and context-aware answers by retrieving relevant information from user-provided documents (e.g. `.txt`, `.pdf`, `.docx`, `.md`) and simple web pages. This retrieval is powered by semantic search over documents indexed locally using Faiss or in the cloud using AstraDB.
 
 - **Multilingual Query Support:** Supports questions in more than 14 languages, regardless of the language used in the original data source. Users can freely interact with their content in the language they are most comfortable with.
 
@@ -71,7 +58,14 @@ Following is an overview of the key technologies and services employed to implem
 
 - **Offline Voice Activity Detection (VAD):** Utilizes [**Silero VAD**](https://github.com/snakers4/silero-vad), a highly accurate and lightweight offline voice activity detector, to identify when a user is actively speaking. This allows the system to initiate ASR streaming **only during detected speech**, significantly reducing unnecessary API usage, network traffic, and associated costs.
 
-- **Vector Store (RAG Backend):** [**AstraDB**](https://www.datastax.com/astra) is used for storing document embeddings and enabling fast semantic search. AstraDB is a highly scalable, serverless vector database built on Apache Cassandra. Thanks to [**LlamaIndex's** vector store abstraction](https://docs.llamaindex.ai/en/stable/module_guides/storing/vector_stores/), the implementation can be easily adapted to alternative vector databases such as Pinecone, Qdrant, Chroma, or FAISS.
+- **Vector Store (RAG Backend):** [**Faiss**](https://faiss.ai/index.html) or [**AstraDB**](https://www.datastax.com/astra) is used for storing document embeddings and enabling fast semantic search locally or in the cloud. 
+
+  **Faiss** (Facebook AI Similarity Search) is a highly optimized library developed by Meta for efficient similarity search and clustering of dense vectors. It is ideal for **local deployments**, offering fast in-memory indexing and search with various indexing strategies to balance speed and memory usage.
+
+  **AstraDB**, on the other hand, is a **cloud-native, serverless vector database** built on Apache Cassandra. It is designed for scalability and elasticity in distributed environments, making it suitable for remote or hybrid deployments that require persistent storage, cross-device access, or integration with other cloud services.
+
+  Thanks to [**LlamaIndex's** vector store abstraction](https://docs.llamaindex.ai/en/stable/module_guides/storing/vector_stores/), the implementation can be easily adapted to a variety of alternative vector databases such as **Pinecone**, **Qdrant**, or **Chroma**, allowing developers to choose the most appropriate backend based on performance, storage requirements, or infrastructure preferences.
+
 
 - **Data Ingestion & Web Integration:** Document ingestion and chunking are powered by [**LlamaIndex**](https://www.llamaindex.ai/), supporting formats such as `.pdf`, `.txt`, `.docx`, and `.md`. Additionally, it includes a web connector layer that allows scraping and indexing of simple HTML pages. This can be extended via tools like **SpiderWeb** and other [LlamaIndex web connectors](https://docs.llamaindex.ai/en/stable/examples/data_connectors/WebPageDemo/) to handle richer web content extraction.
 
@@ -82,7 +76,7 @@ Following is an overview of the key technologies and services employed to implem
 
 
 ## Getting Started
-The QTrobot Data Assistant can run on all variants of QTrobot for Research version.
+The QTrobot Online Data Assistant can run on all variants of QTrobot for Research version.
 
 ### Installation
 :::info Notice
@@ -98,74 +92,14 @@ The installation process involves three main steps: ***(1) Installing Nvidia Riv
 
 
 
-1. **Install Nvidia Riva ASR:**
-   - Sign in to your [Nvidia NGC](https://ngc.nvidia.com/signin) portal (sign up if you don't have an account).
-   - Follow the instructions for [Generating Your NGC API Key](https://docs.nvidia.com/ngc/gpu-cloud/ngc-user-guide/index.html#generating-api-key) to obtain an API key.
-   - Use your API key to log in to the NGC registry by entering the following command and following the prompts.
-
-     **Note:** The `ngc` CLI is already installed on the QTrobot, so no need to install it.
-     ```bash
-     ngc config set
-     ```
-   - Download the Embedded Riva start scripts to the `~/robot` folder using the following command:
-     ```bash
-     cd ~/robot/      
-     ngc registry resource download-version nvidia/riva/riva_quickstart_arm64:2.14.0
-     ```
-   - Modify `~/robot/riva_quickstart_arm64_v2.14.0/config.sh` to disable unnecessary services, keeping only `service_enabled_asr` enabled. The relevant part of `config.sh` should look like this:
-     ```bash
-     # ...
-     # Enable or Disable Riva Services
-     service_enabled_asr=true
-     service_enabled_nlp=false
-     service_enabled_tts=false
-     service_enabled_nmt=false
-     # ...
-     ```
-   - Update the `~/robot/riva_quickstart_arm64_v2.14.0/riva_init.sh` script to resolve the Nvidia NGC CLI version issue by changing the version from `3.26.0` to `3.63.0`. Replace the URL on line 170 with:
-     ```bash
-      # Original line:
-      # https://api.ngc.nvidia.com/v2/resources/nvidia/ngc-apps/ngc_cli/versions/3.26.0/files/ngccli_arm64.zip
-
-      # Updated line:
-      https://api.ngc.nvidia.com/v2/resources/nvidia/ngc-apps/ngc_cli/versions/3.63.0/files/ngccli_arm64.zip
-     ``` 
-   - Initialize the Riva ASR container. This may take around 30 minutes, depending on your internet speed.
-     ```bash
-     cd ~/robot/riva_quickstart_arm64_v2.14.0
-     bash ./riva_init.sh
-     ```
-
-2. **Install ollama and pull the required models:**
-    - We have prepared a script (`install_ollama.sh`) to download and install the appropriate version of ollama on QTrobot's Jetson AGX Orin. To install Ollama, execute the following command:
+1. **Setup Groq clould API key:**
+    - Visit [Groq cloud console](https://console.groq.com/keys) to create a **FREE** API Key.
+    - Configure your API key as an environment variable. To do that edit `~/.bash_aliases` file and add the following line:
       ```bash
-      cd qt_ai_data_assistant_online
-      sudo bash ./scripts/install_ollama.sh
-      ```
+      export GROQ_API_KEY="<you-api-key>"
+      ```    
 
-    - Next, download the required models. These models are approximately 6 GB in size, so the download may take some time. If the download process is interrupted, simply rerun the command to resume.
-
-      ```bash
-      ollama pull llama3.1:latest
-      ollama pull mxbai-embed-large:latest
-      ```
-    
-    - Verify that all the required models have been downloaded correctly by using the `ollama list` command. The output should look similar to the following:
-      ```bash
-      NAME                    	ID          	SIZE  	MODIFIED      
-      mxbai-embed-large:latest	468836162de7	669 MB	3 minutes ago
-      llama3.1:latest         	f66fc8dc39ea	4.7 GB	10 minutes ago
-      ```
-    - Test the llama3.1 model from the command line using the following command. Please note that it may take some time for Ollama to load the model for the first time. If Ollama fails with a timeout message during the initial load, simply rerun the command. Subsequent model loads will be much faster.:
-      ```tex
-      $ ollama run llama3.1
-      >>> who are you?
-      I'm an artificial intelligence model known as Llama. Llama stands for "Large Language Model Meta AI."
-      >>> Send a message (/? for help)
-      ```
-      To exit the chat, press `ctrl+c` or type `/bye`.
-
-3. **Install required python packages:**
+2. **Install required python packages:**
     - Create a python3 virtual environment and install pip packages:    
       ```bash
       cd qt_ai_data_assistant_online
@@ -178,16 +112,7 @@ The installation process involves three main steps: ***(1) Installing Nvidia Riv
 
 ### Usage
 
-***Note:***: *An internet connection is required the first time you run the QTrobot Data Assistant to download the necessary models, including NLTK, RetinaFace, and VGG-Face.*
-
-
-First, ensure that the Riva ASR Docker service is running. If Riva is not active, it may take 1 to 2 minutes to initialize.
-```bash
-cd ~/robot/riva_quickstart_arm64_v2.14.0
-bash ./riva_start.sh ./config.sh -s
-```
-
-#### Run the QTrobot Data Assistant with demo data:
+#### Run the QTrobot Online Data Assistant with demo data:
 The repository includes a demo PDF file detailing the QTrobot research variants and specifications. To run the project with this demo document: 
 ```bash
 cd qt_ai_data_assistant_online
@@ -196,8 +121,8 @@ python src/qt_ai_data_assistant_online.py
 ```
 Wait a few seconds for the script to initialize and load the document. Once it's ready, you can begin conversing with the QTrobot. For example, you might ask, *"What are all your variants?"* or *"How can I program QTrobot?"* You can also ask questions unrelated to the document, such as, *"What are the official languages of Luxembourg?"*
 
-#### Run the QTrobot Data Assistant with your own data:
-To run the QTrobot Data Assistant with your own data, first create a folder to store your documents:
+#### Run the QTrobot Online Data Assistant with your own data:
+To run the QTrobot Online Data Assistant with your own data, first create a folder to store your documents:
 ```bash
 mkdir ~/Documents/qt-assistant-data
 ```
@@ -206,45 +131,118 @@ Copy your PDF file(s) into your project's document folder (`~/Documents/qt-assis
 ```bash
 cd qt_ai_data_assistant_online
 source venv/bin/activate
-python src/qt_ai_data_assistant_online.py -d ~/Documents/qt-assistant-data
+python src/qt_ai_data_assistant_online.py --docs ~/Documents/qt-assistant-data --reload
 ```
-Wait a few seconds for the script to initialize and load the document. Once it's ready, you can ask questions about the content of your PDF.    
 
-#### Pause and Resume the conversation with voice command
-You can ask QTrobot to pause the conversation and remain unresponsive until explicitly instructed to resume. This can be done through natural language commands:
+Wait a few seconds for the script to initialize and reload (`--reload`) the document. Once it's ready, you can ask questions about the content of your PDF. 
 
-- To pause the conversation, simply say: *"Hold on for a minute"* or *"Stay silent."*
-- To resume the conversation, explicitly say: *"Restart the conversation"* or *"Let's talk."*
+
+#### Run the QTrobot Online Data Assistant with data from Web:
+ QTrobot Online Data Assistant can scrape and index dimple HTML web pages, for example news pages. 
+ To run the assitant with online data, simply provide the `urls` as follows: 
+
+```bash
+cd qt_ai_data_assistant_online
+source venv/bin/activate
+python src/qt_ai_data_assistant_online.py --source web --urls https://lite.cnn.com/ --reload 
+```
+When it started and fetch the new page, you can ask questions about the latest news. 
+
 
 ### Customization
 You can customize the demo project in various ways to suit your needs:
 
+
+#### Choosing a different LLM model ftom Groq Cloud:
+By default, QTrobot Online Data Assistant uses the [Google Gemma2](https://blog.google/technology/developers/google-gemma-2/) llm for conversation.  However, you can experiment with different LLMs, such as [**Mata Llama 3.1**](https://llama.meta.com/) to explore varying conversational styles, performance, or domain-specific knowledge. To use a different model start the `qt_ai_data_assistant_online.py` script and specify the LLM model as a parameter:
+
+```bash
+cd qt_ai_data_assistant_online
+source venv/bin/activate
+python src/qt_ai_data_assistant_online.py --llm-engine groq --llm-model llama-3.1-8b-instant
+```
+
+You can see all [Groq cloud supported models here](https://console.groq.com/docs/models). 
+
+
+#### Choosing models (GPT4-o) ftom OpenAI:
+By default, QTrobot Online Data Assistant uses models from Groq cloud. However, you can use more advanced models from OpenAI such as GPT4 and GPT4-o. To do that: 
+
+  - Login [OpenAI Developer platform](https://platform.openai.com) and create new secret key.
+  - Configure your API key as an environment variable. To do that edit `~/.bash_aliases` file and add the following line:
+    ```bash
+    export OPENAI_API_KEY=="<you-openai-api-key>"
+    ```    
+next start the `qt_ai_data_assistant_online.py` script and specify the LLM engine and model as parameters
+
+```bash
+source ~/.bash_aliases
+cd qt_ai_data_assistant_online
+source venv/bin/activate
+python src/qt_ai_data_assistant_online.py --llm-engine openai --llm-model gpt-4o-mini
+```
+
+You can see all [OpenAI supported models here](https://platform.openai.com/docs/models). 
+
+
+#### Using Azure Speech recognition:
+[**Azure Speech Service**](https://azure.microsoft.com/en-us/products/ai-services/speech-services) offers highly accurate, enterprise-grade automatic speech recognition with extensive **language support** (100+ languages and variants) and **regional availability**, making it a strong choice for international deployments. For developers interested in trying it out, Azure offers a **Free Tier** ideal for development and testing. 
+
+To get started, you'll need an `AZURE_SUBSCRIPTION_KEY` and `AZURE_REGION`. Follow the official Microsoft guide here [Create an Azure Speech resource and get your subscription keys](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/get-started-speech-to-text)
+
+Next configure your subscription keys as an environment variable. To do that edit `~/.bash_aliases` file and add the following line:
+```bash
+export AZURE_SUBSCRIPTION_KEY="<your-azure-subscription-key>"
+export AZURE_REGION="<your-azure-service-region>"
+```    
+
+Ensure `azure-cognitiveservices-speech` python package is installed in your project's virtual environemnt: 
+
+```bash
+cd qt_ai_data_assistant_online
+source venv/bin/activate
+pip install azure-cognitiveservices-speech
+```
+
+Start the `qt_ai_data_assistant_online.py` script and specify the Azure ASR engine as parameter: 
+
+```bash
+source ~/.bash_aliases
+python src/qt_ai_data_assistant_online.py --asr-engine azure
+```
+
+
+#### Using Google Speech recognition:
+
+[**Google Cloud Speech-to-Text**](https://cloud.google.com/speech-to-text) provides real-time, high-accuracy transcription powered by Google's deep learning models. It supports **125+ languages and variants**, making it a solid choice for multilingual and global deployments.
+
+To get started, follow the setup guide from Google: [Transcribe audio using client libraries](https://cloud.google.com/speech-to-text/docs/transcribe-client-libraries).  You will need to export your Google Cloud credentials in a `.json` format and save them to your QTrobot (QTPC). Once you've downloaded your credentials:
+
+Edit your `~/.bash_aliases` file and add the following line:
+
+```bash
+export GOOGLE_APPLICATION_CREDENTIALS="/home/qtrobot/google_speech_key.json"
+```
+
+Make sure the google-cloud-speech Python package is installed in your virtual environment:
+```bash
+cd qt_ai_data_assistant_online
+source venv/bin/activate
+pip install google-cloud-speech
+```
+
+Then start the assistant and specify the Google ASR engine:
+```bash
+source ~/.bash_aliases
+python src/qt_ai_data_assistant_online.py --asr-engine google
+```
+
+
 #### Using a different converation language:
-QTrobot Data Assistant allows users to query their data in a language different from the one used in the provided document. To do this, you must enable your desired language in your Riva ASR installation and ensure that the corresponding language is also configured for QTrobot's Text-to-Speech (TTS) system. 
 
-Riva ASR supports a variety of languages including English, German, French, Italian and many more. Check the [Riva ASR supported languges](https://docs.nvidia.com/deeplearning/riva/user-guide/docs/asr/asr-overview.html#pretrained-asr-models) for complete list. 
+QTrobot Online Data Assistant supports multilingual interaction, allowing users to query and receive responses in a language different from that of the original document.  Language support depends on the **multilingual capabilities of the selected LLM and ASR service**. Most LLMs mentioned in this tutorial—such as **Gemma2**, **LLaMA 3.1**, and various **OpenAI models**—offer robust support for multiple languages. However, to ensure a seamless conversational experience, you must also verify that the selected language is supported by **QTrobot's Text-to-Speech (TTS)** system.
 
-To enable a specific language in Riva ASR, you need to modify the `~/robot/riva_quickstart_arm64_v2.14.0/config.sh` file to add your language code and then re-initialize Riva ASR. For example, to enable French (fr-FR), modify the `asr_language_code` parameter to include `fr-FR`:
-
-```bash
-# For multiple languages enter space separated language codes.
-asr_language_code=("en-US" "fr-FR")
-```
-
-Next, stop the currently running instance of Riva and re-initialize the service:
-
-```bash
-cd ~/robot/riva_quickstart_arm64_v2.14.0
-bash ./riva_stop.sh
-bash ./riva_init.sh
-```
-Then restart the Riva ASR:
-```bash
-cd ~/robot/riva_quickstart_arm64_v2.14.0
-bash ./riva_start.sh ./config.sh -s
-```
-
-Once Riva ASR is running, you can start the `qt_ai_data_assistant_online.py` script and provide the conversation language code:
+To launch the demo in a specific language (e.g. French), run the following command:
  
 ```bash
 cd qt_ai_data_assistant_online
@@ -252,14 +250,17 @@ source venv/bin/activate
 python src/qt_ai_data_assistant_online.py --lang fr-FR
 ```
 
-The `--lang <lang code>` parameter sets both the ASR and TTS languages to the specified language.
+The `--lang <lang code>`  parameter automatically sets both the ASR input language and the TTS output language for the conversation.
 
-***Note:*** *If the TTS language is not installed on your QTrobot, please contact [support@luxai.com](malito:support@luxai.com) to obtain the necessary language files.* 
+You can also change the conversation language dynamically through the built-in Web UI. To do so, open a browser on the QTPC and visit: [127.0.0.1:6060](http://127.0.0.1:6060/). 
+
+
+***Note:*** *If the desired TTS language is not installed on your QTrobot, please contact [support@luxai.com](malito:support@luxai.com) to obtain the necessary language files.* 
 
 
 
 #### Using different document formats: 
-By default QTrobot Data Assistant loads PDF (`.pdf`) documents from the specified directory. It uses the [LlamaIndex Data Framework](https://www.llamaindex.ai/) to support various document formats such as `.txt`, `.docx` and `.md`. You can specify the document formats and the maximum number of files to load using the appropriate parameters.
+By default QTrobot Online Data Assistant loads PDF (`.pdf`) documents from the specified directory. It uses the [LlamaIndex Data Framework](https://www.llamaindex.ai/) to support various document formats such as `.txt`, `.docx` and `.md`. You can specify the document formats and the maximum number of files to load using the appropriate parameters.
 
 For example, to load a maximum of 5 PDF and DOCX files from `~/Documents/qt-assistant-data`, use the following commands:
 ```bash
@@ -274,101 +275,83 @@ You can customize the role and behavior of QTrobot by modifying the system role 
 ##### Why Customizing the Role is Interesting
 Customizing the system role allows you to adapt QTrobot to a wide range of applications beyond its default educational and research-focused roles. Whether you need QTrobot to act as a receptionist, a healthcare assistant, a tourist guide, or any other role, this flexibility makes QTrobot a powerful tool in various environments. By fine-tuning the system role, you can ensure that QTrobot meets the specific needs of your users, providing a more personalized and effective experience. Additionally, by leveraging Retrieval-Augmented Generation (RAG), QTrobot can provide highly relevant and contextual responses based on user-provided documents and data, enhancing its utility in specialized roles.
 
-The default system role is defined in the `llm_prompts.py` file: 
-```python
-ConversationPrompt = {
-    'system_role': '''     
-     You are a humanoid social robot assistant named "QTrobot". You can hear and talk. You are designed to support various use cases, including the education of children with autism and other special needs, as well as human-robot interaction research and teaching.
-
+The default system role is defined in the `config/default.yaml` file: 
+```yaml
+- name: "role"
+  type: "str"
+  label: "Robot role"
+  description: "This is the LLM system prompt which define the robot's role"
+  ui:
+    element: "textarea"
+  scope: "runtime"
+  default: |
+    You are a humanoid social robot assistant named "QTrobot". You can hear and talk. You are designed to support various use cases, including the education of children with autism and other special needs, as well as human-robot interaction research and teaching.
     Follow these guidelines when answering questions:
-    - Always respond in one or two brief sentences. Keep your sentences as short as possible.
-    ...    
-    '''
-}
+  - Always respond in one or two brief sentences. Keep your sentences as short as possible.
+  ...    
 ```
 To modify QTrobot’s role, you can edit the relevant part of `system_role` section in the `llm_prompts.py` file. By changing the system role, you can assign QTrobot a new identity and set of behaviors. Here are some examples of how you might customize QTrobot's role, emphasizing its ability to use Retrieval-Augmented Generation (RAG) to provide insightful responses based on user-provided data: 
 
 - **Example 1: Receptionist**
  
   Transform QTrobot into a virtual receptionist who can greet visitors, provide information, and answer queries based on company documents or FAQs:
-  ```python
-  ConversationPrompt = {
-      'system_role': '''     
+  ```yaml
+  - name: "role"
+    type: "str"
+    label: "Robot role"
+    description: "This is the LLM system prompt which define the robot's role"
+    ui:
+      element: "textarea"
+    scope: "runtime"
+    default: |  
       You are a receptionist named "QTrobot". Your job is to greet visitors, answer their questions, and provide information based on the company’s documents.
-
       Follow these guidelines when answering questions:
       - Always respond in one or two brief sentences. Keep your sentences as short as possible.
       ...    
-      '''
-  }
   ```
 
 - **Example 2: Tourist Guide**
  
   QTrobot can act as a virtual tourist guide, offering information about local attractions, history, and travel tips by pulling data from guidebooks, maps, and other resources
-  ```python
-  ConversationPrompt = {
-      'system_role': '''     
+
+  ```yaml
+  - name: "role"
+    type: "str"
+    label: "Robot role"
+    description: "This is the LLM system prompt which define the robot's role"
+    ui:
+      element: "textarea"
+    scope: "runtime"
+    default: |  
       You are a tourist guide named "QTrobot". Your role is to provide tourists with information about local attractions, history, and travel tips based on guidebooks and other documents.
 
       Follow these guidelines when answering questions:
       - Always respond in one or two brief sentences. Keep your sentences as short as possible.
-      ...    
-      '''
-  }
+      ...
   ```
+
 
 - **Example 3: Research Conference Center Assistant**
   
   Transform QTrobot into a virtual conference assistant that helps attendees navigate the event, find sessions, and get information about workshops and presentations:
-  ```python
-  ConversationPrompt = {
-      'system_role': '''     
+
+  ```yaml
+  - name: "role"
+    type: "str"
+    label: "Robot role"
+    description: "This is the LLM system prompt which define the robot's role"
+    ui:
+      element: "textarea"
+    scope: "runtime"
+    default: |  
       You are a conference assistant named "QTrobot" at a research conference center. Your role is to assist attendees by providing information about the venue, schedule, workshops, and research presentation sessions.       
       Provide clear and concise information about the conference schedule, including session times and locations only from the provided documents.
       Use a polite and professional tone.
 
       Follow these guidelines when answering questions:
       - Always respond in one or two brief sentences. Keep your sentences as short as possible.
-      ...    
-      '''
-  }
+      ... 
   ```
-
-
-#### Choosing a different LLM model for conversation:
-By default, QTrobot Data Assistant uses the  [**Mata Llama 3.1**](https://llama.meta.com/) llm for conversation.  However, you can experiment with different LLMs, such as  [Google Gemma2](https://blog.google/technology/developers/google-gemma-2/) to explore varying conversational styles, performance, or domain-specific knowledge. You can experiment with these models via the Ollama interface. To use a different model, first pull the model using the Ollama command: 
-
-```bash
-ollama pull gemma2  
-```
-Next, start the `qt_ai_data_assistant_online.py` script and specify the LLM model as a parameter:
-
-```bash
-cd qt_ai_data_assistant_online
-source venv/bin/activate
-python src/qt_ai_data_assistant_online.py --llm gemma2
-```
-
-#### Enabling scene undertanding:
-QTrobot uses the [moondream](https://moondream.ai) Visual Language Model (VLM) to analyze scenes, recognize objects, and infer context, allowing it to provide responses based on visual cues. By default, this feature is not enabled. Follow these steps to enable scene understanding and converse with QTrobot about what it sees through its camera feed.
-
-First, pull the Moondream model using the Ollama command. The model is approximately 1.7GB, so downloading may take some time:
-```bash
-ollama pull moondream 
-```
-
-Next, start the `qt_ai_data_assistant_online.py` script and enable scene understanding with the following parameter:
-
-```bash
-cd qt_ai_data_assistant_online
-source venv/bin/activate
-python src/qt_ai_data_assistant_online.py --enable-scene
-```
-
-When enabled, the `SceneDetection` module will periodically query the VLM (by default every 10 seconds) and use the scene description as additional context for the LLM. After enabling the scene feature in `qt_ai_data_assistant_online.py`, wait for a short time and then start interacting with QTrobot. You can ask questions like, *"Tell me what you see,"* or *"How many people do you see now?"*
-
-***Note:*** *Enabling scene understanding may introduce a slight delay in QTrobot's response time due to increased GPU usage and inference time required by Ollama during LLM and VLM processing at the same time*
 
 
 #### Disabling Retrieval-Augmented Generation:
@@ -382,6 +365,7 @@ python src/qt_ai_data_assistant_online.py --disable-rag
 ```
 When RAG is disabled, QTrobot will no longer retrieve information from documents or external sources, and all responses will be generated directly by the LLM based on the content provided in the `system_role`. This can improve response times and is ideal when external knowledge retrieval is not needed for your use case.
 
+
 #### Storing and restoring conversations
 To save the entire conversation and restore it later, simply run the `qt_ai_data_assistant_online.py` script and specify the path to the JSON file where the conversation memory will be stored.
 - If the JSON file already exists, the conversation memory will be loaded from it at the start.
@@ -389,30 +373,56 @@ To save the entire conversation and restore it later, simply run the `qt_ai_data
 
 Example usage:
 ```bash 
-python qt_ai_data_assistant_online.py --mem-store ~/chat_store.json
+python src/qt_ai_data_assistant_online.py --mem-store ~/chat_store.json
 ```
+
 
 #### Command-line parameters
 ```bash
-python qt_ai_data_assistant_online.py --help
+ python src/qt_ai_data_assistant_online.py --help
+usage: qt_ai_data_assistant_online.py [-h] [--source SOURCE] [--urls URLS [URLS ...]] [--docs DOCS] [--formats FORMATS [FORMATS ...]] [--max-docs MAX_DOCS] [--reload] [--llm-engine LLM_ENGINE] [--llm-model LLM_MODEL]
+                                      [--asr-engine ASR_ENGINE] [--mem-store MEM_STORE] [--paused] [--lang LANG] [--disable-rag] [--volume VOLUME]
 
-usage: qt_ai_data_assistant_online.py [-h] [-d DOCS] [--formats FORMATS [FORMATS ...]] [--max-docs MAX_DOCS] [--lang LANG] [--llm LLM] [--mem-store MEM_STORE] [--enable-scene] [--disable-rag]
+Configuration for the QT AI Agent application
 
 optional arguments:
   -h, --help            show this help message and exit
-  -d DOCS, --docs DOCS  Path to the folder containg documents to load
+  --source SOURCE       Asr engine to use. Default is groq.
+  --urls URLS [URLS ...]
+                        list of urls to load data from using simple web reader.
+  --docs DOCS           Path to the folder containing documents to load.
   --formats FORMATS [FORMATS ...]
-                        document formats ('.txt' '.pdf', '.docx', '.md').
-  --max-docs MAX_DOCS   maximum number of docuemnt files load
-  --lang LANG           Conversation language (ar-AR, en-US, en-GB, de-DE, es-ES, es-US, fr-FR, hi-IN, it-IT, ja-JP, ru-RU, ko-KR, pt-BR, zh-CN)
-  --llm LLM             LLM model to use. default is llama3.1.
+                        Document formats ('.txt', '.pdf', '.docx', '.md').
+  --max-docs MAX_DOCS   Maximum number of document files to load.
+  --reload              Reload data from web or local. Default is false.
+  --llm-engine LLM_ENGINE
+                        LLM Server engine to use. Default is groq.
+  --llm-model LLM_MODEL
+                        LLM model to use. default is gemma2-9b-it.
+  --asr-engine ASR_ENGINE
+                        Asr engine to use. Default is groq.
   --mem-store MEM_STORE
-                        path to a json file (e.g. ./chat_store.json) to store the and restore the conversation memeory
-  --enable-scene        Enables camera feed scene processing
-  --disable-rag         Disable Retrieval-Augmented Generation
+                        Path to a JSON file (e.g., ./chat_store.json) to store and restore the conversation memory.
+  --paused              Pause and Resume the interaction
+  --lang LANG           Conversation language (ar-AR, en-US, en-GB, de-DE, es-ES, es-US, fr-FR, hi-IN, it-IT, ja-JP, ru-RU, ko-KR, pt-BR, zh-CN).
+  --disable-rag         Disable Retrieval-Augmented Generation.
+  --volume VOLUME       Robot's speaker volume level.
 
-example: qt_ai_data_assitant.py -d ~/my-docuemnts --formats .pdf .docx --max-docs 3 --lang en-US
 ```
+
+#### QTrobot Online Data Assistant – Web UI Access
+The QTrobot Online Data Assistant utilizes the [Paramify](https://github.com/luxai-qtrobot/paramify#readme) module to provide a web-based interface for modifying runtime parameters.
+
+Through this interface, you can easily change of the paramaters such as setting language, or pausing and resuming the conversation, among other adjustments.
+
+To access the Web UI:
+
+1. Open a web browser on the QTPC.
+2. Navigate to [http://127.0.0.1:6060](http://127.0.0.1:6060/).
+
+
+![QT Online AI Data Assistant Web UI](https://github.com/luxai-qtrobot/tutorials/tree/master/demos/qt_ai_data_assistant_online/raw/main/assets/ui-web_ui.png)
+
 
 ## License
 This project is licensed under the MIT License. See the [LICENSE](https://github.com/luxai-qtrobot/tutorials/blob/master/demos/qt_ai_data_assistant_online/LICENSE) file for details.

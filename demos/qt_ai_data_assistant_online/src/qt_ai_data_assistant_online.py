@@ -413,8 +413,8 @@ class QTAIDataAssistantOnline(ParamifyWeb, BaseNode):
         Logger.info(f"disable_rag param set to {value}")
         self.chat = self._reset_chat_engine()
 
-    def on_enable_scene_set(self, value):
-        Logger.info(f"enable_scene param set to {value}")
+    # def on_enable_scene_set(self, value):
+    #     Logger.info(f"enable_scene param set to {value}")
         # if not value:
         #     self.scene_detector.pause()
         #     return
