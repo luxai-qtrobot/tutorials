@@ -4,19 +4,34 @@
 
 ## Table of Contents
 
-- [QTrobot: Your Online AI Data Assistant](#qtrobot-your-online-ai-data-assistant)
-  - [Features](#features)
-  - [Technologies Used](#technologies-used)
-  - [Getting Started](#getting-started)
-    - [Installation](#installation)
-    - [Usage](#usage)
-  - [License](#license)
+- [Features](#features)
+- [Technologies Used](#technologies-used)
+- [Getting Started](#getting-started)
+  - [Installation](#installation)
+  - [Usage](#usage)
+    - [Run the QTrobot Online Data Assistant with demo data](#run-the-qtrobot-online-data-assistant-with-demo-data)
+    - [Run the QTrobot Online Data Assistant with your own data](#run-the-qtrobot-online-data-assistant-with-your-own-data)
+    - [Run the QTrobot Online Data Assistant with data from Web](#run-the-qtrobot-online-data-assistant-with-data-from-web)
+  - [Customization](#customization)
+    - [Choosing a different LLM model ftom Groq Cloud](#choosing-a-different-llm-model-ftom-groq-cloud)
+    - [Choosing models (GPT4-o) ftom OpenAI](#choosing-models-gpt4-o-ftom-openai)
+    - [Using Azure Speech recognition](#using-azure-speech-recognition)
+    - [Using Google Speech recognition](#using-google-speech-recognition)
+    - [Using a different converation language](#using-a-different-converation-language)
+    - [Using different document formats](#using-different-document-formats)
+    - [Customizing the QTrobot's Role](#customizing-the-qtrobots-role)
+    - [Disabling Retrieval-Augmented Generation](#disabling-retrieval-augmented-generation)
+    - [Storing and restoring conversations](#storing-and-restoring-conversations)
+    - [Command-line parameters](#command-line-parameters)
+    - [QTrobot Online Data Assistant - Web UI Access](#qtrobot-online-data-assistant---web-ui-access)
+- [License](#license)
 
+  
 ## Features
 
 - **Retrieval-Augmented Generation (RAG):** Enhances QTrobot's ability to provide accurate and context-aware answers by retrieving relevant information from user-provided documents (e.g. `.txt`, `.pdf`, `.docx`, `.md`) and simple web pages. This retrieval is powered by semantic search over documents indexed locally using Faiss or in the cloud using AstraDB.
 
-- **Multilingual Query Support:** Supports questions in more than 14 languages, regardless of the language used in the original data source. Users can freely interact with their content in the language they are most comfortable with.
+- **Multilingual Query Support:** Supports queries in a wide range of languages, regardless of the language used in the original data source. Users can freely interact with their content in the language they are most comfortable with.
 
 - **Online Large Language Models (LLMs):** Integrates with a variety of cloud-based LLMs (e.g. OpenAI, Groq) to generate fluent, context-aware responses. The modular design allows easy expansion to new LLM providers via LlamaIndex.
 
@@ -24,7 +39,7 @@
 
 - **Web Data Ingestion:** In addition to local documents, this version can **scrape and index web pages**, allowing dynamic expansion of its knowledge base without manual upload steps.
 
-- **Flexible, Cloud-Based Architecture:** This assistant is optimized for **resource-constrained robots** and can run on **QTrobot-i5 and QTrobot-i7** without dedicated GPU hardware. Its modular design also makes it ideal for evolving deployments and diverse connectivity scenarios.
+- **Flexible, Cloud-Based Architecture:** This assistant is optimized for QTrobots without dedicated GPU hardware. Its modular design also makes it ideal for evolving deployments and diverse connectivity scenarios.
 
 - **Provider Choice & Cost Optimization:** Gives users control over which ASR, LLM, or vector store service they use—enabling smarter, **cost-effective customization** of their AI assistant setup.
 
