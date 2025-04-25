@@ -1,19 +1,3 @@
----
-id: qt_ai_assistant_online
-title: "QTrobot: Your Online AI Data Assistant"
-hide_table_of_contents: true
-pagination_label: QTrobot-Your Online AI Data Assistant
----
-
-
-import Icon from '@mui/material/Icon';
-import GitHubIcon from '@mui/icons-material/GitHub';
-
-:::info Overview
-<br/> <Icon> track_changes </Icon> &nbsp;**Goal:**&nbsp; *This project demonstrates how to use online LLM and RAG to build conversational data assistant*
-<br/> <Icon> code </Icon> &nbsp;**Source code:**&nbsp; *[Check the source code here](https://github.com/luxai-qtrobot/tutorials/tree/master/demos/qt_ai_data_assistant_online)*
-:::
-
 **The Online AI Data Assistant** is a flexible, cloud-enhanced version of the QT AI Assistant, designed for QTrobot models that do not include dedicated GPU hardware, such as QTrobot-i5 and QTrobot-i7. Built upon the powerful LlamaIndex framework, this demo enables QTrobot to serve as a conversational AI assistant that can ingest, index, and intelligently respond to user queries over custom documents and online content.
 
 
@@ -79,16 +63,15 @@ Following is an overview of the key technologies and services employed to implem
 The QTrobot Online Data Assistant can run on all variants of QTrobot for Research version.
 
 ### Installation
-:::info Notice
  - The project's source code is available in the *[LuxAI Tutorials Github Repository](https://github.com/luxai-qtrobot/tutorials/tree/master/demos/qt_ai_data_assistant_online)*. To get the latest version of the code on your **QTPC**: `cd ~/robot/code/tutorials/; git pull`
  - Ensure that *software*  repository on **QTPC** is updated and service files for `qt_respeaker_app` is installed in your catkin workspace: 
     - `cd ~/robot/code/software/; git pull`
     - `cd ~/catkin_ws/; ln -s ~/robot/code/software/headers/qt_respeaker_app/ ./src`
     - `cd ~/catkin_ws/; catkin_make`
 - Throughout this documentation, we will refer to *"~/robot/code/tutorials/demos/qt_ai_data_assistant_online"* as *"qt_ai_data_assistant_online"*.
-:::
 
-The installation process involves three main steps: ***(1) Installing Nvidia Riva ASR***, ***(2) Installing Ollama and required models*** and ***(3) Installing python packages*** 
+
+The default installation is configured to use Groq Cloud for both LLM and ASR services. If you prefer to use models from OpenAI or Azure and Google ASR instead, please refer to the instructions in the  the [Customization](#customization) section.
 
 
 
