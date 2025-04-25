@@ -20,7 +20,7 @@ import GitHubIcon from '@mui/icons-material/GitHub';
 
 ## Table of Contents
 
-- [QTrobot: Your Online AI Data Assistant](#qtrobot-your-ai-data-assistant)
+- [QTrobot: Your Online AI Data Assistant](#qtrobot-your-online-ai-data-assistant)
   - [Features](#features)
   - [Technologies Used](#technologies-used)
   - [Getting Started](#getting-started)
@@ -421,7 +421,7 @@ To access the Web UI:
 2. Navigate to [http://127.0.0.1:6060](http://127.0.0.1:6060/).
 
 
-![QT Online AI Data Assistant Web UI](https://github.com/luxai-qtrobot/tutorials/tree/master/demos/qt_ai_data_assistant_online/raw/main/assets/ui-web_ui.png)
+![QT Online AI Data Assistant Web UI](https://github.com/luxai-qtrobot/tutorials/blob/master/demos/qt_ai_data_assistant_online/assets/web_ui.png)
 
 
 ## License
