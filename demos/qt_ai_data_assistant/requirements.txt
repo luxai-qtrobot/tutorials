@@ -4,6 +4,7 @@ pyyaml
 tenacity==8.4.2
 termcolor
 opencv-python
+silero-vad==5.1.2
 
 # Paramify
 git+https://github.com/luxai-qtrobot/paramify.git#egg=paramify
@@ -34,6 +35,7 @@ docx2txt
 
 # Riva ASR
 nvidia-riva-client==2.16.0
+
 
 # NVIDIA torch
 https://developer.download.nvidia.cn/compute/redist/jp/v512/pytorch/torch-2.1.0a0+41361538.nv23.06-cp38-cp38-linux_aarch64.whl
