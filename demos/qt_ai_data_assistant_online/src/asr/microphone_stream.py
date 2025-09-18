@@ -205,6 +205,7 @@ class MicrophoneStream:
         if not self.closed:
             try:
                 chunk = bytes(msg.data)
+                is_voice = False
                 try:
                     is_voice = self.vad.is_voice(chunk) if self.vad else False
                     if is_voice:
